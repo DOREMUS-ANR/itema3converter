@@ -1,0 +1,46 @@
+group 'org.doremus'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'application'
+
+configurations.all {
+    resolutionStrategy {
+        force 'xml-apis:xml-apis:1.4.01'
+    }
+}
+
+
+repositories {
+    jcenter()
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+run {
+    standardOutput = System.out
+}
+// Plugin: 'application'
+// fill with the complete package path of the "main" class
+mainClassName = 'org.doremus.itema3converter.Converter'
+
+
+buildscript {
+    repositories {
+        jcenter()
+        flatDir {
+            dirs 'libs'
+        }
+    }
+    // TODO gradle jena plugin is waiting for a pull request
+    // see https://github.com/gnagy/gradle-jena-plugin/pull/2
+//    dependencies {
+//        classpath 'org.apache.jena:jena-cmds:3.1.0',
+//                'hu.webhejj.gradle:gradle-jena-plugin:1.1.0@jar'
+//    }
+}
