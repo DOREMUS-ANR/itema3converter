@@ -1,6 +1,9 @@
+import hu.webhejj.gradle.jena.UrlSchemaGen
+
 group 'org.doremus'
 version '1.0-SNAPSHOT'
 
+apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'application'
 
@@ -19,7 +22,9 @@ repositories {
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile 'org.slf4j:slf4j-api:1.7.21',
+            'org.slf4j:slf4j-simple:1.7.21',
+            'org.apache.jena:apache-jena-libs:3.1.0'
 }
 
 run {
@@ -39,8 +44,59 @@ buildscript {
     }
     // TODO gradle jena plugin is waiting for a pull request
     // see https://github.com/gnagy/gradle-jena-plugin/pull/2
-//    dependencies {
-//        classpath 'org.apache.jena:jena-cmds:3.1.0',
-//                'hu.webhejj.gradle:gradle-jena-plugin:1.1.0@jar'
-//    }
+    dependencies {
+        classpath 'org.apache.jena:jena-cmds:3.1.0',
+                'hu.webhejj.gradle:gradle-jena-plugin:1.1.0@jar'
+    }
 }
+
+task schemagen(dependsOn: ['schemagenFrbroo', 'schemagenCidoc', 'schemagenDoremus', 'schemagenProvO'])
+
+task schemagenProvO(type: UrlSchemaGen) {
+    input = uri('http://www.w3.org/ns/prov')
+    outputDirectory = file('src/main/java/')
+    packageName = 'org.doremus.ontology'
+    classNameSuffix = 'PROV'
+    ontology = true
+    inference = true
+    nostrict = true
+    nocomments = true
+    namespace = 'http://www.w3.org/ns/prov#'
+}
+
+task schemagenDoremus(type: UrlSchemaGen) {
+    input = uri('https://raw.githubusercontent.com/DOREMUS-ANR/doremus-ontology/master/doremus.ttl')
+    outputDirectory = file('src/main/java/')
+    packageName = 'org.doremus.ontology'
+    classNameSuffix = 'MUS'
+    ontology = true
+    inference = true
+    nostrict = true
+    nocomments = true
+    namespace = 'http://data.doremus.org/ontology#'
+}
+
+task schemagenFrbroo(type: UrlSchemaGen) {
+    input = uri('http://erlangen-crm.org/efrbroo/')
+    outputDirectory = file('src/main/java/')
+    packageName = 'org.doremus.ontology'
+    classNameSuffix = 'FRBROO'
+    ontology = true
+    inference = false
+    nostrict = true
+    nocomments = true
+    namespace = 'http://erlangen-crm.org/efrbroo/'
+}
+
+task schemagenCidoc(type: UrlSchemaGen) {
+    input = uri('http://erlangen-crm.org/current/')
+    outputDirectory = file('src/main/java/')
+    packageName = 'org.doremus.ontology'
+    classNameSuffix = 'CIDOC'
+    ontology = true
+    inference = false
+    nostrict = true
+    nocomments = true
+    namespace = 'http://erlangen-crm.org/current/'
+}
+

@@ -1,5 +1,16 @@
 package org.doremus.itema3converter;
 
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.sparql.vocabulary.FOAF;
+import org.apache.jena.vocabulary.DCTerms;
+import org.apache.jena.vocabulary.OWL;
+import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.XSD;
+import org.doremus.ontology.CIDOC;
+import org.doremus.ontology.FRBROO;
+import org.doremus.ontology.MUS;
+import org.doremus.ontology.PROV;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -11,19 +22,21 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Properties;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Converter {
-
+    static Logger log = MyLogger.getLogger(Converter.class.getName());
     public static final String UTF8_BOM = "\uFEFF";
 
     public static Properties properties;
-    private static String dataFolderPath;
+    static String dataFolderPath;
 
     public static void main(String[] args) throws IOException, XMLStreamException, TransformerException {
         // INIT
@@ -36,16 +49,55 @@ public class Converter {
         // end INIT
 
         File inputFolder = new File(properties.getProperty("src"));
+        File outputFolder = new File(properties.getProperty("out"));
+
         dataFolderPath = Paths.get(properties.getProperty("src"), "data").toString();
         File dataFolder = new File(dataFolderPath);
 
         if (!dataFolder.exists()) {
-            System.out.println("Pre-processing data");
+            log.info("Pre-processing data. It will be needed only the first time");
             for (File f : inputFolder.listFiles())
                 fileToFolder(f);
-            System.out.println("End Pre-processing\n\n");
+            log.info("End Pre-processing\n\n");
         }
 
+        if (!outputFolder.exists()) outputFolder.mkdirs();
+
+
+        // MAG_CONTENU is the first folder to parse
+        File mcFolder = new File(Paths.get(dataFolderPath, "MAG_CONTENU").toString());
+        int i = 0;
+        for (File mc : mcFolder.listFiles()) {
+            if (++i > 4) break;
+
+            try {
+                RecordConverter r = new RecordConverter(mc);
+                Model m = r.getModel();
+
+                if (m == null) continue;
+                m.setNsPrefix("mus", MUS.getURI());
+                m.setNsPrefix("ecrm", CIDOC.getURI());
+                m.setNsPrefix("efrbroo", FRBROO.getURI());
+                m.setNsPrefix("xsd", XSD.getURI());
+                m.setNsPrefix("dcterms", DCTerms.getURI());
+                m.setNsPrefix("owl", OWL.getURI());
+                m.setNsPrefix("foaf", FOAF.getURI());
+                m.setNsPrefix("rdfs", RDFS.getURI());
+                m.setNsPrefix("prov", PROV.getURI());
+
+
+                // Write the output file
+                String newFileName = mc.getName().replaceFirst(".xml", ".ttl");
+                FileWriter out = new FileWriter(Paths.get(outputFolder.getAbsolutePath(), newFileName).toString());
+                // m.write(System.out, "TURTLE");
+                m.write(out, "TURTLE");
+                out.close();
+
+
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+        }
         // TODO continue
 
     }
