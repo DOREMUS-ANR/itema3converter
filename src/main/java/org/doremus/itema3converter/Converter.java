@@ -6,6 +6,8 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.apache.jena.vocabulary.*;
 import org.doremus.itema3converter.files.LieuGeo;
+import org.doremus.itema3converter.files.Personne;
+import org.doremus.itema3converter.musResources.E21_Person;
 import org.doremus.itema3converter.musResources.E53_Place;
 import org.doremus.ontology.CIDOC;
 import org.doremus.ontology.FRBROO;
@@ -48,6 +50,7 @@ public class Converter {
         System.out.println(properties);
 
         GeoNames.loadCache();
+        E21_Person.loadCache();
         System.out.println("\n\n");
         // end INIT
 
@@ -74,12 +77,20 @@ public class Converter {
             GeoNames.setDestFolder(geonamesFolder);
 
             File plFolder = new File(Paths.get(dataFolderPath, "LIEU_GEO").toString());
-            int j = 0;
+
+            new File(outputFolderPath + "/place/p").mkdirs();
             for (File p : plFolder.listFiles()) {
-                if (j > 1800) break;
                 parsePlace(p, outputFolderPath + "/place/p");
             }
-            return;
+        }
+
+        if (properties.getProperty("persons").equals("true")) {
+            File persFolder = new File(Paths.get(dataFolderPath, "PERSONNE").toString());
+            new File(outputFolderPath + "/person").mkdirs();
+            for (File p : persFolder.listFiles()) {
+                parsePerson(p, outputFolderPath + "/person");
+            }
+
         }
 
         // MAG_CONTENU is the first folder to parse
@@ -93,9 +104,28 @@ public class Converter {
 
     }
 
-    private static void parsePlace(File p, String outputFolder) {
-        new File(outputFolder).mkdirs();
+    private static void parsePerson(File p, String outputFolder) {
+        Personne ps = Personne.fromFile(p);
+        if (ps.getStatus() != 1) return;
+        try {
+            E21_Person person = new E21_Person(ps);
+            log.info("Person : " + ps.getId() + " " + person.getFullName());
 
+            Model m = person.getModel();
+            m.setNsPrefix("ecrm", CIDOC.getURI());
+            m.setNsPrefix("rdfs", RDFS.getURI());
+            m.setNsPrefix("dc", DCTerms.getURI());
+            m.setNsPrefix("foaf", FOAF.getURI());
+            m.setNsPrefix("xsd", XSD.getURI());
+
+            writeTtl(m, Paths.get(outputFolder, p.getName().replaceFirst(".xml", ".ttl")).toString());
+
+        } catch (URISyntaxException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void parsePlace(File p, String outputFolder) {
         Model m = ModelFactory.createDefaultModel();
 
         LieuGeo lg = LieuGeo.fromFile(p);
@@ -125,6 +155,7 @@ public class Converter {
         }
         m.setNsPrefix("ecrm", CIDOC.getURI());
         m.setNsPrefix("rdfs", RDFS.getURI());
+        m.setNsPrefix("dc", DCTerms.getURI());
 
         try {
             writeTtl(m, Paths.get(outputFolder, p.getName().replaceFirst(".xml", ".ttl")).toString());
@@ -172,9 +203,7 @@ public class Converter {
         removeUTF8BOM(f);
 
         String fileName = f.getName().replaceFirst("\\.xml", "");
-//        if (!fileName.equals("TH_VA_MORALE")) return;
         System.out.println(fileName);
-
 
         new File(Paths.get(dataFolderPath, fileName).toString()).mkdirs();
 
@@ -246,6 +275,8 @@ public class Converter {
 
 
     private static void removeUTF8BOM(File f) throws IOException {
+        // workaround: the person file is too big for this
+        if (f.getName().equals("PERSONNE.xml")) return;
         // remove UTF8 BOM
         // https://stackoverflow.com/questions/4569123/content-is-not-allowed-in-prolog-saxparserexception
         boolean firstLine = true;

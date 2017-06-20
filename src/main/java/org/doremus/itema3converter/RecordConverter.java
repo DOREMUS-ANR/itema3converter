@@ -6,7 +6,6 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.doremus.itema3converter.files.Item;
-import org.doremus.itema3converter.files.Itema3File;
 import org.doremus.itema3converter.files.MagContenu;
 
 import java.io.File;
@@ -15,6 +14,8 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -85,8 +86,19 @@ public class RecordConverter {
     }
 
 
-    private static File getFile(String type, String id) {
+    public static File getFile(String type, String id) {
         return new File(Paths.get(Converter.dataFolderPath, type, id + ".xml").toString());
+    }
+
+    public static List<File> getFilesStartingWith(String type, String start) {
+        List<File> fileList = new ArrayList<>();
+        File dir = new File(Paths.get(Converter.dataFolderPath, type).toString());
+        for(File file : dir.listFiles()) {
+            if(file.getName().startsWith(start))
+                fileList.add(file);
+        }
+
+        return fileList;
     }
 
     public Model getModel() {

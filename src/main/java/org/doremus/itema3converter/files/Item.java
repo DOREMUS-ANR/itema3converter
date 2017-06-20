@@ -1,5 +1,7 @@
 package org.doremus.itema3converter.files;
 
+import org.doremus.itema3converter.RecordConverter;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -12,9 +14,15 @@ import java.io.File;
 public class Item extends Itema3File {
     @XmlElement(name = "ITEM_ID")
     private String id;
-
     @XmlElement(name = "STATUT_DOC_ID")
     private int status;
+    @XmlElement(name = "ITEM_LIB")
+    private String label;
+    @XmlElement(name = "ITEM_DESCRIPTION")
+    private String description;
+    @XmlElement(name = "ITEM_ANALYSE_DOC_ID")
+    private String analyseDocId;
+
 
     @Override
     public String getId() {
@@ -23,6 +31,19 @@ public class Item extends Itema3File {
 
     public int getStatus() {
         return status;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getAnalyseDoc() {
+        if(analyseDocId == null) return null;
+        return AnalyseDoc.fromFile(RecordConverter.getFile("ANALYSE_DOC", analyseDocId)).getValue();
     }
 
     public static Item fromFile(File file) {
@@ -35,5 +56,6 @@ public class Item extends Itema3File {
             return null;
         }
     }
+
 
 }

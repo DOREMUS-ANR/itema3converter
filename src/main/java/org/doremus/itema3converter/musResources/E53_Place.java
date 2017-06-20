@@ -13,7 +13,8 @@ public class E53_Place extends DoremusResource {
         super(record);
 
         String label = record.getLabel();
-        if (record.getQualif() != null) label += " (" + record.getQualif() + ")";
+        if (record.getQualif() != null && !record.getQualif().isEmpty())
+            label += " (" + record.getQualif() + ")";
 
         this.resource.addProperty(RDF.type, CIDOC.E53_Place)
                 .addProperty(RDFS.label, label)

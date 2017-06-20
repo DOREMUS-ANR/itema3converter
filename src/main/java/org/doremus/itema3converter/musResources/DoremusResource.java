@@ -29,7 +29,7 @@ public abstract class DoremusResource {
 
     /* generate URI */
         this.className = this.getClass().getSimpleName();
-        this.sourceDb = "rf";
+        this.sourceDb = "rfi"; // radio france itema3
         this.publisher = RecordConverter.RadioFrance;
 
         this.resource = null;

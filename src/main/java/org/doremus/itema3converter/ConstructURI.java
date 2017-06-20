@@ -60,6 +60,8 @@ public class ConstructURI {
                 return "period";
             case "E53_Place":
                 return "place";
+            case "theme":
+                return "theme";
             case "prov":
                 return "activity";
             default:
