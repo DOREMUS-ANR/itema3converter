@@ -58,6 +58,8 @@ public class ConstructURI {
                 return "artist";
             case "E4_Period":
                 return "period";
+            case "E53_Place":
+                return "place";
             case "prov":
                 return "activity";
             default:

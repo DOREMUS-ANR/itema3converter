@@ -1,15 +1,17 @@
 package org.doremus.itema3converter;
 
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.vocabulary.FOAF;
-import org.apache.jena.vocabulary.DCTerms;
-import org.apache.jena.vocabulary.OWL;
-import org.apache.jena.vocabulary.RDFS;
-import org.apache.jena.vocabulary.XSD;
+import org.apache.jena.vocabulary.*;
+import org.doremus.itema3converter.files.LieuGeo;
+import org.doremus.itema3converter.musResources.E53_Place;
 import org.doremus.ontology.CIDOC;
 import org.doremus.ontology.FRBROO;
 import org.doremus.ontology.MUS;
 import org.doremus.ontology.PROV;
+import org.geonames.*;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
@@ -45,13 +47,15 @@ public class Converter {
         loadProperties();
         System.out.println(properties);
 
+        GeoNames.loadCache();
         System.out.println("\n\n");
         // end INIT
 
-        File inputFolder = new File(properties.getProperty("src"));
-        File outputFolder = new File(properties.getProperty("out"));
+        String inputFolderPath = properties.getProperty("src");
+        String outputFolderPath = properties.getProperty("out");
+        File inputFolder = new File(inputFolderPath);
 
-        dataFolderPath = Paths.get(properties.getProperty("src"), "data").toString();
+        dataFolderPath = Paths.get(inputFolderPath, "data").toString();
         File dataFolder = new File(dataFolderPath);
 
         if (!dataFolder.exists()) {
@@ -61,44 +65,104 @@ public class Converter {
             log.info("End Pre-processing\n\n");
         }
 
-        if (!outputFolder.exists()) outputFolder.mkdirs();
+        new File(outputFolderPath + "/item").mkdirs();
 
+        if (properties.getProperty("places").equals("true")) {
+            GeoNames.setUser(properties.getProperty("geonames_user"));
+            String geonamesFolder = Paths.get(outputFolderPath, "place", "geonames").toString();
+            new File(geonamesFolder).mkdirs();
+            GeoNames.setDestFolder(geonamesFolder);
+
+            File plFolder = new File(Paths.get(dataFolderPath, "LIEU_GEO").toString());
+            int j = 0;
+            for (File p : plFolder.listFiles()) {
+                if (j > 1800) break;
+                parsePlace(p, outputFolderPath + "/place/p");
+            }
+            return;
+        }
 
         // MAG_CONTENU is the first folder to parse
         File mcFolder = new File(Paths.get(dataFolderPath, "MAG_CONTENU").toString());
         int i = 0;
         for (File mc : mcFolder.listFiles()) {
             if (++i > 4) break;
-
-            try {
-                RecordConverter r = new RecordConverter(mc);
-                Model m = r.getModel();
-
-                if (m == null) continue;
-                m.setNsPrefix("mus", MUS.getURI());
-                m.setNsPrefix("ecrm", CIDOC.getURI());
-                m.setNsPrefix("efrbroo", FRBROO.getURI());
-                m.setNsPrefix("xsd", XSD.getURI());
-                m.setNsPrefix("dcterms", DCTerms.getURI());
-                m.setNsPrefix("owl", OWL.getURI());
-                m.setNsPrefix("foaf", FOAF.getURI());
-                m.setNsPrefix("rdfs", RDFS.getURI());
-                m.setNsPrefix("prov", PROV.getURI());
-
-
-                // Write the output file
-                String newFileName = mc.getName().replaceFirst(".xml", ".ttl");
-                FileWriter out = new FileWriter(Paths.get(outputFolder.getAbsolutePath(), newFileName).toString());
-                // m.write(System.out, "TURTLE");
-                m.write(out, "TURTLE");
-                out.close();
-
-
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            }
+            parseRecord(mc, outputFolderPath + "/item");
         }
         // TODO continue
+
+    }
+
+    private static void parsePlace(File p, String outputFolder) {
+        new File(outputFolder).mkdirs();
+
+        Model m = ModelFactory.createDefaultModel();
+
+        LieuGeo lg = LieuGeo.fromFile(p);
+        assert lg != null;
+
+        if (lg.getQualif() != null && lg.getQualif().contains("PEUPLE"))
+            return;
+        log.info("Place: " + lg.getId() + " : " + lg.getLabel());
+
+        Toponym tp = GeoNames.query(lg);
+        if (tp != null) {
+            // simply download the file
+            String uri = "http://sws.geonames.org/" + tp.getGeoNameId() + "/";
+            log.info("> " + uri + " : " + tp.getName());
+            GeoNames.downloadRdf(tp.getGeoNameId());
+
+            // add some additional info
+            Resource place = m.createResource(uri).addProperty(RDF.type, CIDOC.E53_Place);
+            if (lg.getFatherId() != null)
+                place.addProperty(CIDOC.P89_falls_within, new E53_Place(lg.getFatherId()).asResource());
+            if (tp.getName() != null)
+                place.addProperty(RDFS.label, tp.getName());
+        } else {
+            // model it as a Place
+            E53_Place pl = new E53_Place(lg);
+            m.add(pl.getModel());
+        }
+        m.setNsPrefix("ecrm", CIDOC.getURI());
+        m.setNsPrefix("rdfs", RDFS.getURI());
+
+        try {
+            writeTtl(m, Paths.get(outputFolder, p.getName().replaceFirst(".xml", ".ttl")).toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void parseRecord(File mc, String outputFolder) {
+        try {
+            RecordConverter r = new RecordConverter(mc);
+            Model m = r.getModel();
+
+            if (m == null) return;
+            m.setNsPrefix("mus", MUS.getURI());
+            m.setNsPrefix("ecrm", CIDOC.getURI());
+            m.setNsPrefix("efrbroo", FRBROO.getURI());
+            m.setNsPrefix("xsd", XSD.getURI());
+            m.setNsPrefix("dcterms", DCTerms.getURI());
+            m.setNsPrefix("owl", OWL.getURI());
+            m.setNsPrefix("foaf", FOAF.getURI());
+            m.setNsPrefix("rdfs", RDFS.getURI());
+            m.setNsPrefix("prov", PROV.getURI());
+
+            String newFileName = mc.getName().replaceFirst(".xml", ".ttl");
+            writeTtl(m, Paths.get(outputFolder, newFileName).toString());
+        } catch (IOException | URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void writeTtl(Model m, String filename) throws IOException {
+        // Write the output file
+        FileWriter out = new FileWriter(filename);
+        // m.write(System.out, "TURTLE");
+        m.write(out, "TURTLE");
+        out.close();
 
     }
 

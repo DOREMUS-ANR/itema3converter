@@ -6,6 +6,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.doremus.itema3converter.files.Item;
+import org.doremus.itema3converter.files.Itema3File;
 import org.doremus.itema3converter.files.MagContenu;
 
 import java.io.File;
@@ -24,28 +25,29 @@ import org.doremus.ontology.PROV;
 
 // Convert entirely an entire single ITEM of ITEMA3, from performance to track
 public class RecordConverter {
-    public static final Resource RadioFrance = ModelFactory.createDefaultModel().createResource("http://data.doremus" +
-            ".org/organization/Radio_France");
-//    public static final DateFormat ISODateTimeFormat = new SimpleDateFormat("yyyy-MM-ddThh:mm:ss");
+    public static Resource RadioFrance;
+    //    public static final DateFormat ISODateTimeFormat = new SimpleDateFormat("yyyy-MM-ddThh:mm:ss");
 //    public static final DateFormat ISOTimeFormat = new SimpleDateFormat("hh:mm:ss");
     public static final DateFormat ISODateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     private static Logger log = MyLogger.getLogger(RecordConverter.class.getName());
     private Resource provEntity, provActivity;
 
-    Model model;
+    private Model model;
 
 
     public RecordConverter(File mc) throws URISyntaxException {
         log.setLevel(Level.OFF);
 
         model = ModelFactory.createDefaultModel();
+        RadioFrance = model.createResource("http://data.doremus.org/organization/Radio_France");
 
         MagContenu mag = MagContenu.fromFile(mc);
 
         System.out.println("MAG_CONTENU " + mag.getId());
 
         Item item = Item.fromFile(getFile("ITEM", mag.getItemId()));
+        assert item != null;
         log.info("ITEM " + item.getId());
 
         if (item.getStatus() != 4) {
