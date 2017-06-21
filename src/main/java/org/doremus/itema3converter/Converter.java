@@ -6,9 +6,11 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.apache.jena.vocabulary.*;
 import org.doremus.itema3converter.files.LieuGeo;
+import org.doremus.itema3converter.files.Morale;
 import org.doremus.itema3converter.files.Personne;
 import org.doremus.itema3converter.musResources.E21_Person;
 import org.doremus.itema3converter.musResources.E53_Place;
+import org.doremus.itema3converter.musResources.F11_Corporate_Body;
 import org.doremus.ontology.CIDOC;
 import org.doremus.ontology.FRBROO;
 import org.doremus.ontology.MUS;
@@ -93,6 +95,15 @@ public class Converter {
 
         }
 
+        if (properties.getProperty("organizations").equals("true")) {
+            File organizFolder = new File(Paths.get(dataFolderPath, "MORALE").toString());
+            new File(outputFolderPath + "/organization").mkdirs();
+            for (File p : organizFolder.listFiles()) {
+                parseOrganization(p, outputFolderPath + "/organization");
+            }
+
+        }
+
         // MAG_CONTENU is the first folder to parse
         File mcFolder = new File(Paths.get(dataFolderPath, "MAG_CONTENU").toString());
         int i = 0;
@@ -111,15 +122,23 @@ public class Converter {
             E21_Person person = new E21_Person(ps);
             log.info("Person : " + ps.getId() + " " + person.getFullName());
 
-            Model m = person.getModel();
-            m.setNsPrefix("ecrm", CIDOC.getURI());
-            m.setNsPrefix("rdfs", RDFS.getURI());
-            m.setNsPrefix("dc", DCTerms.getURI());
-            m.setNsPrefix("foaf", FOAF.getURI());
-            m.setNsPrefix("xsd", XSD.getURI());
+            writeTtl(person.getModel(), Paths.get(outputFolder, p.getName().replaceFirst(".xml", ".ttl")).toString());
+        } catch (URISyntaxException | IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    private static void parseOrganization(File p, String outputFolder) {
+        Morale mr = Morale.fromFile(p);
+        if (mr.getStatus() != 1) return;
+        try {
+            F11_Corporate_Body cb = new F11_Corporate_Body(mr);
+            log.info("Corporate : " + mr.getId() + " " + cb.getName());
+
+            Model m = cb.getModel();
             writeTtl(m, Paths.get(outputFolder, p.getName().replaceFirst(".xml", ".ttl")).toString());
-
+        } catch (NullPointerException e) {
+            log.severe("Corporate without name: " + mr.getId());
         } catch (URISyntaxException | IOException e) {
             e.printStackTrace();
         }
@@ -153,10 +172,6 @@ public class Converter {
             E53_Place pl = new E53_Place(lg);
             m.add(pl.getModel());
         }
-        m.setNsPrefix("ecrm", CIDOC.getURI());
-        m.setNsPrefix("rdfs", RDFS.getURI());
-        m.setNsPrefix("dc", DCTerms.getURI());
-
         try {
             writeTtl(m, Paths.get(outputFolder, p.getName().replaceFirst(".xml", ".ttl")).toString());
         } catch (IOException e) {
@@ -170,31 +185,30 @@ public class Converter {
             Model m = r.getModel();
 
             if (m == null) return;
-            m.setNsPrefix("mus", MUS.getURI());
-            m.setNsPrefix("ecrm", CIDOC.getURI());
-            m.setNsPrefix("efrbroo", FRBROO.getURI());
-            m.setNsPrefix("xsd", XSD.getURI());
-            m.setNsPrefix("dcterms", DCTerms.getURI());
-            m.setNsPrefix("owl", OWL.getURI());
-            m.setNsPrefix("foaf", FOAF.getURI());
-            m.setNsPrefix("rdfs", RDFS.getURI());
-            m.setNsPrefix("prov", PROV.getURI());
 
             String newFileName = mc.getName().replaceFirst(".xml", ".ttl");
             writeTtl(m, Paths.get(outputFolder, newFileName).toString());
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
-
     }
 
     private static void writeTtl(Model m, String filename) throws IOException {
+        m.setNsPrefix("mus", MUS.getURI());
+        m.setNsPrefix("ecrm", CIDOC.getURI());
+        m.setNsPrefix("efrbroo", FRBROO.getURI());
+        m.setNsPrefix("xsd", XSD.getURI());
+        m.setNsPrefix("dcterms", DCTerms.getURI());
+        m.setNsPrefix("owl", OWL.getURI());
+        m.setNsPrefix("foaf", FOAF.getURI());
+        m.setNsPrefix("rdfs", RDFS.getURI());
+        m.setNsPrefix("prov", PROV.getURI());
+
         // Write the output file
         FileWriter out = new FileWriter(filename);
         // m.write(System.out, "TURTLE");
         m.write(out, "TURTLE");
         out.close();
-
     }
 
     private static void fileToFolder(File f) throws XMLStreamException, IOException, TransformerException {
@@ -265,10 +279,6 @@ public class Converter {
 
             Files.write(Paths.get(dataFolderPath, fileName, id + ".xml"), recordString.getBytes(),
                     StandardOpenOption.CREATE);
-
-
-//                    File file = new File("out/" + xsr.getAttributeValue(null, "account") + ".xml");
-//                t.transform(new StAXSource(xsr), new StreamResult(file));
         }
         xsr.close();
     }

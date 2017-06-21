@@ -27,7 +27,7 @@ public abstract class DoremusResource {
         this.identifier = identifier;
         this.model = ModelFactory.createDefaultModel();
 
-    /* generate URI */
+        /* generate URI */
         this.className = this.getClass().getSimpleName();
         this.sourceDb = "rfi"; // radio france itema3
         this.publisher = RecordConverter.RadioFrance;

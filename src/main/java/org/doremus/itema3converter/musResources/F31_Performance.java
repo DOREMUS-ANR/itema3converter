@@ -10,11 +10,11 @@ import org.doremus.itema3converter.RecordConverter;
 import org.doremus.itema3converter.files.*;
 import org.doremus.ontology.CIDOC;
 import org.doremus.ontology.FRBROO;
-import org.doremus.ontology.MUS;
 
 import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class F31_Performance extends DoremusResource {
 
@@ -73,8 +73,21 @@ public class F31_Performance extends DoremusResource {
 //        }
 
 
-        // Performance: Person
-        // TODO
+        // Performance: Person + Corporate Body
+        // create list of persons
+        List<Resource> actors = ItemIdxPersonne.byItem(item.getId()).stream()
+                .map(it -> new E21_Person(it.getIdxId()).asResource())
+                .collect(Collectors.toList());
+
+        // add corporate bodies
+        actors.addAll(ItemIdxMorale.byItem(item.getId()).stream()
+                .map(it -> new F11_Corporate_Body(it.getIdxId()).asResource())
+                .collect(Collectors.toList()));
+
+        for (Resource x : actors) {
+            // FIXME the property U21 is not yet in the ontology
+            // this.resource.addProperty(MUS.U21_is_about_actor, x.asResource());
+        }
 
         // Performance: comment
         for (String s : new String[]{item.getDescription(), item.getAnalyseDoc()})

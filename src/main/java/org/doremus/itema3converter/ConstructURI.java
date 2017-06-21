@@ -55,6 +55,7 @@ public class ConstructURI {
             case "M42_PerformedExpressionCreation":
                 return "performance";
             case "E21_Person":
+            case "F11_Corporate_Body":
                 return "artist";
             case "E4_Period":
                 return "period";
