@@ -14,7 +14,7 @@ import java.net.URISyntaxException;
 
 public abstract class DoremusResource {
     protected String className;
-    protected String sourceDb;
+    protected final String sourceDb=  "rfi"; // radio france itema3
     protected Itema3File record;
 
     protected Model model;
@@ -23,14 +23,23 @@ public abstract class DoremusResource {
     protected String identifier;
     protected Resource publisher;
 
-    public DoremusResource(String identifier) {
-        this.identifier = identifier;
+    public DoremusResource() {
+        // do nothing, enables customisation for child class
         this.model = ModelFactory.createDefaultModel();
-
-        /* generate URI */
         this.className = this.getClass().getSimpleName();
-        this.sourceDb = "rfi"; // radio france itema3
         this.publisher = RecordConverter.RadioFrance;
+    }
+
+    public DoremusResource(URI uri) {
+        this();
+        this.uri = uri;
+        this.resource = model.createResource(this.uri.toString());
+    }
+
+    public DoremusResource(String identifier) {
+        this();
+        this.identifier = identifier;
+
 
         this.resource = null;
         /* create RDF resource */

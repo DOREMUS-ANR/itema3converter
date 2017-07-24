@@ -3,7 +3,9 @@ package org.doremus.itema3converter.musResources;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.datatypes.xsd.impl.XSDDateType;
-import org.apache.jena.rdf.model.*;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -15,20 +17,15 @@ import org.doremus.ontology.CIDOC;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class E21_Person {
+public class E21_Person extends DoremusResource {
     private static HashMap<String, String> cache;
-    private Model model;
     private Personne record;
-    private Resource resource;
-
-    private URI uri;
 
     private String firstName, lastName, pseudo;
     private Date birthDate, deathDate;
@@ -43,7 +40,6 @@ public class E21_Person {
         this.deathDate = record.getDeathDate();
         this.birthYear = toYear(record.getBirthDate(), record.getBirthYear());
         this.deathYear = toYear(record.getDeathDate(), record.getDeathYear());
-        this.model = ModelFactory.createDefaultModel();
 
         String ln = lastName;
         if (lastName == null || lastName.isEmpty()) ln = pseudo;
@@ -64,7 +60,6 @@ public class E21_Person {
 
     public E21_Person(String id) {
         String uri = cache.get(id);
-        this.model = ModelFactory.createDefaultModel();
         this.resource = model.createResource(uri);
     }
 
@@ -78,18 +73,6 @@ public class E21_Person {
             s = localDate.getYear() + "";
         }
         return s;
-    }
-
-    public URI getUri() {
-        return uri;
-    }
-
-    public Model getModel() {
-        return model;
-    }
-
-    public Resource asResource() {
-        return this.resource;
     }
 
     public String getFullName() {
@@ -112,7 +95,7 @@ public class E21_Person {
     }
 
     private Resource initResource() {
-        this.resource = model.createResource(this.getUri().toString());
+        this.resource = model.createResource(this.uri.toString());
         resource.addProperty(RDF.type, CIDOC.E21_Person);
 
         addProperty(FOAF.firstName, firstName);

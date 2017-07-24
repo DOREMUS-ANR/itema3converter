@@ -11,16 +11,19 @@ import org.doremus.itema3converter.files.*;
 import org.doremus.ontology.CIDOC;
 import org.doremus.ontology.FRBROO;
 
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class F31_Performance extends DoremusResource {
+    final static List<Integer> performanceProfession = Arrays.asList(13, 205, 2, 10, 7);
+
 
     public F31_Performance(MagContenu mag, Item item) {
         super(mag);
-
         this.resource.addProperty(RDF.type, FRBROO.F31_Performance);
 
         // Performance: Date
@@ -84,15 +87,38 @@ public class F31_Performance extends DoremusResource {
                 .map(it -> new F11_Corporate_Body(it.getIdxId()).asResource())
                 .collect(Collectors.toList()));
 
-        for (Resource x : actors) {
-            // FIXME the property U21 is not yet in the ontology
-            // this.resource.addProperty(MUS.U21_is_about_actor, x.asResource());
-        }
+
+        // for (Resource x : actors) {
+        // FIXME the property U21 is not yet in the ontology
+        // this.resource.addProperty(MUS.U21_is_about_actor, x.asResource());
+        // }
 
         // Performance: comment
         for (String s : new String[]{item.getDescription(), item.getAnalyseDoc()})
-            if (s != null && !s.isEmpty())
-                this.resource.addProperty(CIDOC.P3_has_note, s, "fr");
+            if (s != null && !s.isEmpty()) {
+                System.out.println(s);
+                this.resource.addProperty(CIDOC.P3_has_note, s.trim(), "fr");
+            }
+
+
+        // Performance: invited
+        int invI = 0;
+        for (Invite inv : Invite.byItem(item.getId())) {
+            DoremusResource ip = null;
+            try {
+                if (!inv.personneID.isEmpty() && performanceProfession.contains(inv.professionID))
+                    ip = new M28_IndividualPerformance(inv, new URI(this.uri + "/" + ++invI));
+//            else if (inv.typeMoraleID > 0)
+//                ip = new F31_Performance(inv, this.uri + "/" + ++invI);
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+
+            if (ip != null) {
+                this.model.add(ip.getModel());
+                this.resource.addProperty(CIDOC.P9_consists_of, ip.asResource());
+            }
+        }
 
     }
 

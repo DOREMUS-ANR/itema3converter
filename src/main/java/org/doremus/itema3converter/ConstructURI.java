@@ -53,6 +53,7 @@ public class ConstructURI {
                 return "publication";
             case "F31_Performance":
             case "M42_PerformedExpressionCreation":
+            case "M28_IndividualPerformance":
                 return "performance";
             case "E21_Person":
             case "F11_Corporate_Body":
@@ -65,6 +66,8 @@ public class ConstructURI {
                 return "theme";
             case "prov":
                 return "activity";
+            case "M31_ActorFunction":
+                return "function";
             default:
                 throw new RuntimeException("[ConstructURI.java] Class not assigned to a collection: " + className);
         }

@@ -108,7 +108,8 @@ public class Converter {
         File mcFolder = new File(Paths.get(dataFolderPath, "MAG_CONTENU").toString());
         int i = 0;
         for (File mc : mcFolder.listFiles()) {
-            if (++i > 4) break;
+            if (!mc.getName().equals("1585264.xml")) continue;
+//            if (++i > 4) break;
             parseRecord(mc, outputFolderPath + "/item");
         }
         // TODO continue
@@ -216,6 +217,8 @@ public class Converter {
         if (!f.getName().endsWith(".xml")) return;
         removeUTF8BOM(f);
 
+        Pattern item_id = Pattern.compile("<ITEM_ID>(.+)</ITEM_ID>");
+
         String fileName = f.getName().replaceFirst("\\.xml", "");
         System.out.println(fileName);
 
@@ -245,6 +248,13 @@ public class Converter {
             String id;
             if (m.find()) {
                 id = m.group(1);
+
+                // The INVITE file is in facts a JOIN table between ITEM and PERSONS
+                if (fileName.equals("INVITE")) {
+                    Matcher mi = item_id.matcher(recordString);
+                    mi.find();
+                    id = mi.group(1) + "_" + id;
+                }
             } else {
                 // it is a join table
                 String splitter = "_";
@@ -260,7 +270,7 @@ public class Converter {
                     if (parts[i].equals("NC")) parts[i] = "NOM_COMMUN"; // known abbreviation
                 }
 
-                // workaround for this exception
+                // workaround for these exceptions
                 if (fileName.equals("OMU_PERSONNE_STATION"))
                     parts = new String[]{"OMU_PERSONNE", "STATION"};
                 if (fileName.startsWith("TH_DOMAINE"))
