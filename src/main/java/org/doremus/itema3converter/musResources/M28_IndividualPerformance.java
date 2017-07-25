@@ -34,7 +34,7 @@ public class M28_IndividualPerformance extends DoremusResource {
         this.role = null;
 
         if (professionID == 10) {
-            // considérer qu'il s'agit d'une erreur et remplacer par PROFESSION_ID=2 Animateur, Présentateur
+            // considerer qu'il s'agit d'une erreur et remplacer par PROFESSION_ID=2 Animateur, Presentateur
             professionID = 2;
         }
 
@@ -81,11 +81,14 @@ public class M28_IndividualPerformance extends DoremusResource {
         if (instrument > 0)
             this.resource.addProperty(MUS.U1_used_medium_of_performance,
                     model.createResource(ITEMA3_VOC_PREFIX + instrument));
-        else if (tessitura > 0)
+        else if (tessitura > 0) {
+            String tessituraLabel = Tessiture.fromId(tessitura).getLabel()
+                    .replace(" (voix)", "").trim();
             this.resource.addProperty(MUS.U1_used_medium_of_performance,
                     model.createResource().addProperty(RDF.type, MUS.M14_Medium_Of_Performance)
-                            .addProperty(RDFS.label, Tessiture.fromId(tessitura).getLabel())
+                            .addProperty(RDFS.label, tessituraLabel, "fr")
             );
+        }
 
         // TODO uncomment when close https://github.com/DOREMUS-ANR/doremus-ontology/issues/24
 //        if (role != null && !role.isEmpty()) {

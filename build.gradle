@@ -26,7 +26,8 @@ dependencies {
             'org.slf4j:slf4j-simple:1.7.21',
             'org.apache.jena:apache-jena-libs:3.1.0',
             'org.geonames:geonames:1.0',
-            'com.opencsv:opencsv:3.10'
+            'com.opencsv:opencsv:3.10',
+            'org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5'
 }
 
 run {
@@ -102,3 +103,7 @@ task schemagenCidoc(type: UrlSchemaGen) {
     namespace = 'http://erlangen-crm.org/current/'
 }
 
+task updateVocabularies(type: JavaExec) {
+    main = "org.doremus.vocabulary.Sync"
+    classpath = sourceSets.main.runtimeClasspath
+}

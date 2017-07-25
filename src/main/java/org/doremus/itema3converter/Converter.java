@@ -15,6 +15,7 @@ import org.doremus.ontology.CIDOC;
 import org.doremus.ontology.FRBROO;
 import org.doremus.ontology.MUS;
 import org.doremus.ontology.PROV;
+import org.doremus.vocabulary.VocabularyManager;
 import org.geonames.*;
 
 import javax.xml.namespace.QName;
@@ -54,6 +55,8 @@ public class Converter {
 
         GeoNames.loadCache();
         E21_Person.loadCache();
+        VocabularyManager.init();
+
         System.out.println("\n\n");
         // end INIT
 
@@ -113,8 +116,6 @@ public class Converter {
             if (!mc.getName().equals("1196138.xml")) continue;
             parseRecord(mc, outputFolderPath + "/item");
         }
-        // TODO continue
-
     }
 
     public static void parsePerson(String id) {
@@ -198,6 +199,8 @@ public class Converter {
             if (m == null) return;
 
             String newFileName = mc.getName().replaceFirst(".xml", ".ttl");
+
+            VocabularyManager.string2uri(m);
             writeTtl(m, Paths.get(outputFolder, newFileName).toString());
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();

@@ -12,6 +12,6 @@ Convert the XML files of the ITEMA3 database by Radio France in RDF following th
 
     gradle run                  ## start conversion of files
     gradle schemagen            ## align ontology packages to ontologies in `doremus-ontology` github project
-[comment]: # (   gradle updateVocabularies   ## sync the vocabularies with the knowledge-base repo )
+    gradle updateVocabularies   ## sync the vocabularies with the knowledge-base repo
 
 [1]: https://drive.google.com/file/d/0B_nxZpGQv9GKZmpKRGl2dmRENGc/view
