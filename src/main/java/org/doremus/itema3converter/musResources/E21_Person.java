@@ -10,6 +10,7 @@ import org.apache.jena.sparql.vocabulary.FOAF;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.doremus.itema3converter.ConstructURI;
+import org.doremus.itema3converter.Converter;
 import org.doremus.itema3converter.RecordConverter;
 import org.doremus.itema3converter.files.Personne;
 import org.doremus.ontology.CIDOC;
@@ -60,6 +61,7 @@ public class E21_Person extends DoremusResource {
 
     public E21_Person(String id) {
         String uri = cache.get(id);
+        if(uri == null || uri.isEmpty()) Converter.parsePerson(id);
         this.resource = model.createResource(uri);
     }
 
@@ -179,4 +181,6 @@ public class E21_Person extends DoremusResource {
         }
 
     }
+
+
 }

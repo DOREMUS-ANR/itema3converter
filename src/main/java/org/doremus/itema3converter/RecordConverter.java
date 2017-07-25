@@ -1,12 +1,19 @@
 package org.doremus.itema3converter;
 
 import org.apache.jena.datatypes.xsd.XSDDatatype;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.doremus.itema3converter.files.Item;
+import org.doremus.itema3converter.files.ItemOmu;
 import org.doremus.itema3converter.files.MagContenu;
+import org.doremus.itema3converter.files.Omu;
+import org.doremus.itema3converter.musResources.*;
+import org.doremus.ontology.CIDOC;
+import org.doremus.ontology.FRBROO;
+import org.doremus.ontology.PROV;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -18,11 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.apache.jena.rdf.model.Model;
-import org.doremus.itema3converter.musResources.DoremusResource;
-import org.doremus.itema3converter.musResources.F31_Performance;
-import org.doremus.ontology.PROV;
 
 // Convert entirely an entire single ITEM of ITEMA3, from performance to track
 public class RecordConverter {
@@ -73,6 +75,29 @@ public class RecordConverter {
         // start parsing
 
         F31_Performance f31 = new F31_Performance(mag, item);
+        addProvenanceTo(f31);
+
+        // Performed expression for this performance
+        for (ItemOmu io : ItemOmu.byItem(item.getId())) {
+            Omu omu = io.getOmu();
+
+            M42_PerformedExpressionCreation pec = new M42_PerformedExpressionCreation(omu, f31);
+            M43_PerformedExpression pe = new M43_PerformedExpression(omu);
+            M44_PerformedWork pw = new M44_PerformedWork(omu);
+            pec.setOrderNumber(io.omuOrderNum);
+
+            f31.asResource()
+                    .addProperty(CIDOC.P9_consists_of, pec.asResource());
+            pec.asResource()
+                    .addProperty(CIDOC.P9i_forms_part_of, f31.asResource())
+                    .addProperty(FRBROO.R19_created_a_realisation_of, pw.asResource())
+                    .addProperty(FRBROO.R17_created, pe.asResource());
+            pw.asResource().addProperty(FRBROO.R9_is_realised_in, pe.asResource());
+
+            model.add(pec.getModel());
+            model.add(pe.getModel());
+            model.add(pw.getModel());
+        }
         model.add(f31.getModel());
 
         log.info("\n");
@@ -93,8 +118,8 @@ public class RecordConverter {
     public static List<File> getFilesStartingWith(String type, String start) {
         List<File> fileList = new ArrayList<>();
         File dir = new File(Paths.get(Converter.dataFolderPath, type).toString());
-        for(File file : dir.listFiles()) {
-            if(file.getName().startsWith(start))
+        for (File file : dir.listFiles()) {
+            if (file.getName().startsWith(start))
                 fileList.add(file);
         }
 

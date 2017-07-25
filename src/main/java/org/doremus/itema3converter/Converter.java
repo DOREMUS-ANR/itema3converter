@@ -43,6 +43,7 @@ public class Converter {
 
     public static Properties properties;
     static String dataFolderPath;
+    private static String inputFolderPath, outputFolderPath;
 
     public static void main(String[] args) throws IOException, XMLStreamException, TransformerException {
         // INIT
@@ -56,8 +57,8 @@ public class Converter {
         System.out.println("\n\n");
         // end INIT
 
-        String inputFolderPath = properties.getProperty("src");
-        String outputFolderPath = properties.getProperty("out");
+        inputFolderPath = properties.getProperty("src");
+        outputFolderPath = properties.getProperty("out");
         File inputFolder = new File(inputFolderPath);
 
         dataFolderPath = Paths.get(inputFolderPath, "data").toString();
@@ -66,6 +67,7 @@ public class Converter {
         if (!dataFolder.exists()) {
             log.info("Pre-processing data. It will be needed only the first time");
             for (File f : inputFolder.listFiles())
+//                if(f.getName().equals("OMU_PERSONNE.xml"))
                 fileToFolder(f);
             log.info("End Pre-processing\n\n");
         }
@@ -108,17 +110,25 @@ public class Converter {
         File mcFolder = new File(Paths.get(dataFolderPath, "MAG_CONTENU").toString());
         int i = 0;
         for (File mc : mcFolder.listFiles()) {
-            if (!mc.getName().equals("1585264.xml")) continue;
-//            if (++i > 4) break;
+            if (!mc.getName().equals("1196138.xml")) continue;
             parseRecord(mc, outputFolderPath + "/item");
         }
         // TODO continue
 
     }
 
+    public static void parsePerson(String id) {
+        File f = new File(Paths.get(dataFolderPath, "PERSONNE", id + ".xml").toString());
+        parsePerson(f, outputFolderPath + "/person", true);
+    }
+
     private static void parsePerson(File p, String outputFolder) {
+        parsePerson(p, outputFolder, false);
+    }
+
+    private static void parsePerson(File p, String outputFolder, boolean force) {
         Personne ps = Personne.fromFile(p);
-        if (ps.getStatus() != 1) return;
+        if (!force && ps.getStatus() != 1) return;
         try {
             E21_Person person = new E21_Person(ps);
             log.info("Person : " + ps.getId() + " " + person.getFullName());
@@ -218,6 +228,7 @@ public class Converter {
         removeUTF8BOM(f);
 
         Pattern item_id = Pattern.compile("<ITEM_ID>(.+)</ITEM_ID>");
+        Pattern omu_id = Pattern.compile("<OMU_ID>(.+)</OMU_ID>");
 
         String fileName = f.getName().replaceFirst("\\.xml", "");
         System.out.println(fileName);
@@ -254,6 +265,12 @@ public class Converter {
                     Matcher mi = item_id.matcher(recordString);
                     mi.find();
                     id = mi.group(1) + "_" + id;
+                }
+                // OMU_PERSONNE has its own id but it is more convenient model it as a JOIN table
+                if (fileName.equals("OMU_PERSONNE")) {
+                    Matcher mo = omu_id.matcher(recordString);
+                    mo.find();
+                    id = mo.group(1) + "_" + id;
                 }
             } else {
                 // it is a join table

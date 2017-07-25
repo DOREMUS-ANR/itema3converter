@@ -13,6 +13,8 @@ import org.doremus.ontology.FRBROO;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -20,20 +22,22 @@ import java.util.stream.Collectors;
 
 public class F31_Performance extends DoremusResource {
     final static List<Integer> performanceProfession = Arrays.asList(13, 205, 2, 10, 7);
-
+    private final Resource timeSpan;
+    private List<E53_Place> placesList;
 
     public F31_Performance(MagContenu mag, Item item) {
         super(mag);
         this.resource.addProperty(RDF.type, FRBROO.F31_Performance);
 
         // Performance: Date
-        // TODO ask for start time (if any)
+        // TODO ask for end time (if any)
         Date start = mag.getDateEnreg();
         Date end = mag.getDateEnreg();
 
 
-        Resource timeSpan = model.createResource(this.uri + "/time")
+        timeSpan = model.createResource(this.uri + "/time")
                 .addProperty(RDF.type, CIDOC.E52_Time_Span)
+                .addProperty(RDFS.label, start.toInstant().toString().substring(0,10))
                 .addProperty(CIDOC.P79_beginning_is_qualified_by, RecordConverter.ISODateFormat.format(start),
                         XSDDatatype.XSDdate)
                 .addProperty(CIDOC.P80_end_is_qualified_by, RecordConverter.ISODateFormat.format(end), XSDDatatype
@@ -41,8 +45,10 @@ public class F31_Performance extends DoremusResource {
         this.resource.addProperty(CIDOC.P4_has_time_span, timeSpan);
 
         // Performance: Place
+        this.placesList = new ArrayList<>();
         for (ItemThLieuGeo t : ItemThLieuGeo.byItem(item.getId())) {
             E53_Place p = new E53_Place(t.getLieuGeoId());
+            placesList.add(p);
             this.resource.addProperty(CIDOC.P7_took_place_at, p.asResource());
         }
 
@@ -70,7 +76,7 @@ public class F31_Performance extends DoremusResource {
 
         // Performance: Geo Topic
         // FIXME the property U22 is not yet in the ontology
-//        for (ItemIdxGeo t : ItemIdxGeo.byItem(item.getId())) {
+//        for (ItemIdxGeo t : ItemIdxGeo.byOmu(item.getId())) {
 //            E53_Place p = new E53_Place(t.getLieuGeoId());
 //            this.resource.addProperty(MUS.U22_is_about_place, p.asResource());
 //        }
@@ -106,10 +112,9 @@ public class F31_Performance extends DoremusResource {
         for (Invite inv : Invite.byItem(item.getId())) {
             DoremusResource ip = null;
             try {
-                if (!inv.personneID.isEmpty() && performanceProfession.contains(inv.professionID))
+                if ((!inv.personneID.isEmpty() && performanceProfession.contains(inv.professionID))
+                        || inv.typeMoraleID > 0)
                     ip = new M28_IndividualPerformance(inv, new URI(this.uri + "/" + ++invI));
-//            else if (inv.typeMoraleID > 0)
-//                ip = new F31_Performance(inv, this.uri + "/" + ++invI);
             } catch (URISyntaxException e) {
                 e.printStackTrace();
             }
@@ -122,4 +127,11 @@ public class F31_Performance extends DoremusResource {
 
     }
 
+    public List<E53_Place> getPlaces() {
+        return placesList;
+    }
+
+    public Resource getTimeSpan() {
+        return timeSpan;
+    }
 }

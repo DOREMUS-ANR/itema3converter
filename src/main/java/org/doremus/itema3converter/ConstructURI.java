@@ -67,7 +67,10 @@ public class ConstructURI {
             case "prov":
                 return "activity";
             case "M31_ActorFunction":
+            case "M31_ActorResponsibility":
                 return "function";
+            case "M14_MediumOfPerformance":
+                return "mop";
             default:
                 throw new RuntimeException("[ConstructURI.java] Class not assigned to a collection: " + className);
         }
