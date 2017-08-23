@@ -80,7 +80,7 @@ task schemagenDoremus(type: UrlSchemaGen) {
 }
 
 task schemagenFrbroo(type: UrlSchemaGen) {
-    input = uri('http://erlangen-crm.org/efrbroo/')
+    input = uri('https://raw.githubusercontent.com/DOREMUS-ANR/doremus-ontology/master/frbroo.owl')
     outputDirectory = file('src/main/java/')
     packageName = 'org.doremus.ontology'
     classNameSuffix = 'FRBROO'

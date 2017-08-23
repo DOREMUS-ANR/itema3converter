@@ -13,6 +13,7 @@ import org.doremus.itema3converter.files.Omu;
 import org.doremus.itema3converter.musResources.*;
 import org.doremus.ontology.CIDOC;
 import org.doremus.ontology.FRBROO;
+import org.doremus.ontology.MUS;
 import org.doremus.ontology.PROV;
 
 import java.io.File;
@@ -87,7 +88,7 @@ public class RecordConverter {
       pec.setOrderNumber(io.omuOrderNum);
 
       F25_PerformancePlan pp = new F25_PerformancePlan(omu);
-      F28_ExpressionCreation ppc = new F28_ExpressionCreation(omu,true);
+      F28_ExpressionCreation ppc = new F28_ExpressionCreation(omu, true);
       F20_PerformanceWork ppw = new F20_PerformanceWork(omu);
 
       f31.asResource()
@@ -104,6 +105,31 @@ public class RecordConverter {
       model.add(pec.getModel());
       model.add(pe.getModel());
       model.add(pw.getModel());
+
+      // The work performed
+      F15_ComplexWork f15 = new F15_ComplexWork(omu);
+      F14_IndividualWork f14 = new F14_IndividualWork(omu);
+      F28_ExpressionCreation f28 = new F28_ExpressionCreation(omu, false);
+      F22_SelfContainedExpression f22 = new F22_SelfContainedExpression(omu);
+
+      f15.asResource()
+        .addProperty(FRBROO.R10_has_member, f14.asResource())
+        .addProperty(MUS.U38_has_descriptive_expression, f22.asResource())
+        .addProperty(FRBROO.R3_is_realised_in, pe.asResource());
+      f14.asResource()
+        .addProperty(FRBROO.R9_is_realised_in, f22.asResource());
+      f28.asResource()
+        .addProperty(FRBROO.R19_created_a_realisation_of, f14.asResource())
+        .addProperty(FRBROO.R17_created, f22.asResource());
+      pe.asResource()
+        .addProperty(MUS.U54_is_performed_expression_of, f22.asResource());
+      f31.asResource()
+        .addProperty(FRBROO.R66_included_performed_version_of, f22.asResource());
+
+      model.add(f15.getModel());
+      model.add(f14.getModel());
+      model.add(f28.getModel());
+      model.add(f22.getModel());
     }
     model.add(f31.getModel());
 
