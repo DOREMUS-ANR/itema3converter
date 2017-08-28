@@ -71,7 +71,7 @@ public class Converter {
     if (!dataFolder.exists()) {
       log.info("Pre-processing data. It will be needed only the first time");
       for (File f : inputFolder.listFiles())
-//      if (f.getName().equals("MAG_SUPPORT.xml"))
+//      if (f.getName().equals("SEQUENCE.xml"))
         fileToFolder(f);
       log.info("End Pre-processing\n\n");
     }
@@ -114,7 +114,8 @@ public class Converter {
     File mcFolder = new File(Paths.get(dataFolderPath, "MAG_CONTENU").toString());
     int i = 0;
     for (File mc : mcFolder.listFiles()) {
-      if (!mc.getName().equals("1196138.xml")) continue;
+//      if (!mc.getName().equals("1196138.xml")) continue;
+      if(++i == 10) return;
       parseRecord(mc, outputFolderPath + "/item");
     }
   }
@@ -272,8 +273,8 @@ public class Converter {
           mi.find();
           id = mi.group(1) + "_" + id;
         }
-        // idem for MAG_SUPPORT
-        if (fileName.equals("MAG_SUPPORT")) {
+        // idem for MAG_SUPPORT and SEQUENCE
+        if (fileName.equals("MAG_SUPPORT") ||  fileName.equals("SEQUENCE")) {
           Matcher mm = mag_id.matcher(recordString);
           mm.find();
           id = mm.group(1) + "_" + id;

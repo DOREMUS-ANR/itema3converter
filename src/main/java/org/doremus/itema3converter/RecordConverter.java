@@ -6,10 +6,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-import org.doremus.itema3converter.files.Item;
-import org.doremus.itema3converter.files.ItemOmu;
-import org.doremus.itema3converter.files.MagContenu;
-import org.doremus.itema3converter.files.Omu;
+import org.doremus.itema3converter.files.*;
 import org.doremus.itema3converter.musResources.*;
 import org.doremus.ontology.CIDOC;
 import org.doremus.ontology.FRBROO;
@@ -23,6 +20,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,7 +46,7 @@ public class RecordConverter {
 
     MagContenu mag = MagContenu.fromFile(mc);
 
-    System.out.println("MAG_CONTENU " + mag.getId());
+    System.out.println("\n\nMAG_CONTENU " + mag.getId());
 
     Item item = Item.fromFile(getFile("ITEM", mag.getItemId()));
     assert item != null;
@@ -78,6 +76,8 @@ public class RecordConverter {
     F31_Performance f31 = new F31_Performance(mag, item);
     addProvenanceTo(f31);
 
+    List<M43_PerformedExpression> peList = new ArrayList<>();
+
     // Performed expression for this performance
     for (ItemOmu io : ItemOmu.byItem(item.getId())) {
       Omu omu = io.getOmu();
@@ -105,6 +105,8 @@ public class RecordConverter {
       model.add(pec.getModel());
       model.add(pe.getModel());
       model.add(pw.getModel());
+
+      peList.add(pe);
 
       // The work performed
       F15_ComplexWork f15 = new F15_ComplexWork(omu);
@@ -147,6 +149,76 @@ public class RecordConverter {
       .addProperty(FRBROO.R13_is_realised_in, rc.asResource());
 
     model.add(re.getModel());
+    model.add(rw.getModel());
+    model.add(rc.getModel());
+
+    // Editing
+    M29_Editing ed = new M29_Editing(mag, item);
+    M46_Set_of_Tracks set = new M46_Set_of_Tracks(mag);
+
+    ed.asResource()
+      .addProperty(MUS.U29_edited, rc.asResource())
+      .addProperty(FRBROO.R17_created, set.asResource());
+
+    for (M43_PerformedExpression pe : peList)
+      set.asResource()
+        .addProperty(MUS.U51_is_partial_or_full_recording_of, pe.asResource());
+
+    for (MagSupport support : MagSupport.byMag(mag.getId())) {
+      F4_ManifestationSingleton ms = new F4_ManifestationSingleton(support);
+
+      ed.asResource()
+        .addProperty(FRBROO.R18_created, ms.asResource());
+
+      ms.asResource()
+        .addProperty(CIDOC.P128_carries, rc.asResource())
+        .addProperty(CIDOC.P165_incorporates, set.asResource());
+
+      model.add(ms.getModel());
+    }
+
+    int trackNum = 0;
+    List<M24_Track> tracks = new ArrayList<>();
+    for (Sequence sequence : Sequence.byMag(mag.getId())) {
+      if (sequence.getType() == Sequence.TYPE.AMBIENT) continue;
+
+      M24_Track track = new M24_Track(sequence, ++trackNum);
+      tracks.add(track);
+      set.asResource().addProperty(FRBROO.R5_has_component, track.asResource());
+    }
+
+    // sort PerformedExpression
+    Collections.sort(peList);
+
+    // assing PerformedExpression to Track
+    for (int i = 0; i < peList.size(); i++) {
+
+      M43_PerformedExpression currentPe = peList.get(i);
+      System.out.println(currentPe.title + " | " + currentPe.timecode);
+
+      int threshold;
+      if (i == peList.size() - 1) //last one
+        threshold = 1000 * 60 * 60 * 24; // one day in millis
+      else threshold = peList.get(i + 1).timecode; // else next timecode
+
+      M24_Track t = tracks.get(0);
+      int tc = t.timecode;
+      while (tc < threshold) {
+        t.asResource()
+          .addProperty(MUS.U51_is_partial_or_full_recording_of, currentPe.asResource());
+        model.add(t.getModel());
+        tracks.remove(t);
+        System.out.println("-- " + t.title+ " | " + t.timecode);
+
+        if (tracks.isEmpty()) break;
+        t = tracks.get(0);
+        tc = t.timecode;
+      }
+    }
+
+    model.add(ed.getModel());
+    model.add(set.getModel());
+
 
     model.add(f31.getModel());
 

@@ -37,7 +37,6 @@ public class MagFreqEchantillon extends Itema3File {
     }
   }
 
-
   public static MagFreqEchantillon getMagFreqEchantillon(int id ) {
     return MagFreqEchantillon.fromFile(RecordConverter.getFile("MAG_FREQ_ECHANTILLON", id + ""));
   }

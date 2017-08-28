@@ -22,7 +22,8 @@ public class Omu extends Itema3File {
   public int durationMillis;
   @XmlElement(name = "OMU_DATE_COMPOSITION")
   public String compositionDate;
-
+  @XmlElement(name = "OMU_TIMECODE")
+  public int timecode;
 
   @Override
   public String getId() {

@@ -9,6 +9,8 @@ import org.doremus.ontology.CIDOC;
 import org.doremus.ontology.FRBROO;
 import org.doremus.ontology.MUS;
 
+import java.util.List;
+
 public class F29_RecordingEvent extends DoremusResource {
   private static int countActivity;
 
@@ -18,9 +20,12 @@ public class F29_RecordingEvent extends DoremusResource {
 
     this.resource.addProperty(RDF.type, FRBROO.F29_Recording_Event);
 
-    Emission emission = ItemEmission.byItem(item.getId()).get(0).getEmission();
-    if (emission.num != 1107)
-      addActivity(RecordConverter.RadioFrance, "Enregistrement");
+    List<ItemEmission> emissions = ItemEmission.byItem(item.getId());
+    if (!emissions.isEmpty()) {
+      Emission emission = emissions.get(0).getEmission();
+      if (emission.num != 1107)
+        addActivity(RecordConverter.RadioFrance, "Enregistrement");
+    }
 
     // Activities
     for (ItemProducteur ip : ItemProducteur.byItem(item.getId())) {
@@ -52,10 +57,9 @@ public class F29_RecordingEvent extends DoremusResource {
     this.resource.addProperty(CIDOC.P9_consists_of,
       model.createResource(a_uri)
         .addProperty(RDF.type, CIDOC.E7_Activity)
-        .addProperty(CIDOC.P14_carried_out_by, RecordConverter.RadioFrance)
+        .addProperty(CIDOC.P14_carried_out_by, actor)
         .addProperty(MUS.U31_had_function_of_type, function)
     );
-
   }
 
 

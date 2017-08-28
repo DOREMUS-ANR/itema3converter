@@ -144,6 +144,9 @@ public class M31_ActorFunction extends DoremusResource {
   public boolean isARecordingRole() {
     return isARecordingRole;
   }
+  public boolean isAnEditingRole() {
+    return isAnEditingRole;
+  }
 
   public boolean isWorkAuthor() {
     return isAuthorMusic || isAuthorText || (typeMoraleID > 0 && isAuthor);

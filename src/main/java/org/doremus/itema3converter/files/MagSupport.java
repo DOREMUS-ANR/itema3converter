@@ -18,6 +18,10 @@ public class MagSupport extends Itema3File {
   private String id;
   @XmlElement(name = "MAG_FREQ_ECHANTILLON_ID")
   private int sampleRateId;
+  @XmlElement(name = "MAG_TYPE_SUPPORT_ID")
+  private int type;
+  @XmlElement(name = "MAG_SUPPORT_NUM_MAGNETO_SIMPLE")
+  public String numMagneto;
 
   @Override
   public String getId() {
@@ -27,6 +31,10 @@ public class MagSupport extends Itema3File {
   public String getSampleRate() {
     MagFreqEchantillon mfe = MagFreqEchantillon.getMagFreqEchantillon(this.sampleRateId);
     return mfe.getSampleRate();
+  }
+
+  public MagTypeSupport getType() {
+    return MagTypeSupport.getMagTypeSupport(this.type);
   }
 
   private static MagSupport fromFile(File file) {

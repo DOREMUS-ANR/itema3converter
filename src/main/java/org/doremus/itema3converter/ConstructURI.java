@@ -76,6 +76,13 @@ public class ConstructURI {
         return "function";
       case "M14_MediumOfPerformance":
         return "mop";
+      case "M29_Editing":
+        return "editing";
+      case "M46_Set_of_Tracks":
+      case "F4_ManifestationSingleton":
+        return "manifestation";
+      case "M24_Track":
+        return "track";
       default:
         throw new RuntimeException("[ConstructURI.java] Class not assigned to a collection: " + className);
     }
