@@ -129,7 +129,8 @@ public class M31_ActorFunction extends DoremusResource {
 
   public String getFunctionId() {
     if (typeMoraleID > 0) return "m" + typeMoraleID;
-    return functionID.isEmpty() ? functionIDAlt : functionID;
+    return (functionID == null || functionID.isEmpty()) ?
+      functionIDAlt : functionID;
   }
 
   public boolean isInterprete() {
@@ -138,6 +139,10 @@ public class M31_ActorFunction extends DoremusResource {
 
   public boolean isAPlanningRole() {
     return isAPlanningRole;
+  }
+
+  public boolean isARecordingRole() {
+    return isARecordingRole;
   }
 
   public boolean isWorkAuthor() {
@@ -152,6 +157,7 @@ public class M31_ActorFunction extends DoremusResource {
       return MUS.U32_had_responsibility_of_type;
     return MUS.U1_used_medium_of_performance;
   }
+
 }
 
 

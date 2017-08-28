@@ -6,11 +6,9 @@ import org.doremus.ontology.FRBROO;
 
 public class F20_PerformanceWork extends DoremusResource {
 
-    public F20_PerformanceWork(Omu omu) {
-      super(omu);
-        this.resource.addProperty(RDF.type, FRBROO.F20_Performance_Work);
-
-
-    }
+  public F20_PerformanceWork(Omu omu) {
+    super(omu);
+    this.resource.addProperty(RDF.type, FRBROO.F20_Performance_Work);
+  }
 
 }

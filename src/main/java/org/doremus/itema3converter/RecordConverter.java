@@ -131,6 +131,23 @@ public class RecordConverter {
       model.add(f28.getModel());
       model.add(f22.getModel());
     }
+
+    // Recording
+    F29_RecordingEvent re = new F29_RecordingEvent(item);
+    for (E53_Place place : f31.getPlaces()) re.setPlace(place);
+    re.setTimeSpan(f31.getTimeSpan());
+    F21_RecordingWork rw = new F21_RecordingWork(item);
+    F26_Recording rc = new F26_Recording(mag);
+
+    re.asResource()
+      .addProperty(FRBROO.R20_recorded, f31.asResource())
+      .addProperty(FRBROO.R22_created_a_realisation_of, rw.asResource())
+      .addProperty(FRBROO.R21_created, rc.asResource());
+    rw.asResource()
+      .addProperty(FRBROO.R13_is_realised_in, rc.asResource());
+
+    model.add(re.getModel());
+
     model.add(f31.getModel());
 
     log.info("\n");

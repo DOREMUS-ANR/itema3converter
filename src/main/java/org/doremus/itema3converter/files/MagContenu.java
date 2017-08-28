@@ -9,54 +9,70 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.File;
+import java.time.Duration;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 @SuppressWarnings("unused")
 @XmlRootElement(name = "DATA_RECORD")
 public class MagContenu extends Itema3File {
-    @XmlElement(name = "MAG_CONTENU_ID")
-    private String id;
-    @XmlElement(name = "ITEM_ID")
-    private String itemId;
-    @XmlElement(name = "MAG_CONTENU_DATE_ENREG", required = true)
-    @XmlJavaTypeAdapter(DateAdapter.class)
-    private Date dateEnreg;
-    @XmlElement(name = "MAG_CONTENU_DUREE", required = true)
-    @XmlJavaTypeAdapter(DateAdapter.class)
-    private Date duree;
-    @XmlElement(name = "MAG_CONTENU_LIEU_ENREG")
-    private String lieuEnreg;
+  private static int timezoneOffset = -1;
 
-    @Override
-    public String getId() {
-        return id;
+  @XmlElement(name = "MAG_CONTENU_ID")
+  private String id;
+  @XmlElement(name = "ITEM_ID")
+  private String itemId;
+  @XmlElement(name = "MAG_CONTENU_DATE_ENREG", required = true)
+  @XmlJavaTypeAdapter(DateAdapter.class)
+  private Date dateEnreg;
+  @XmlElement(name = "MAG_CONTENU_DUREE", required = true)
+  @XmlJavaTypeAdapter(DateAdapter.class)
+  private Date duree;
+  @XmlElement(name = "MAG_CONTENU_LIEU_ENREG")
+  private String lieuEnreg;
+
+  @Override
+  public String getId() {
+    return id;
+  }
+
+  public String getItemId() {
+    return itemId;
+  }
+
+  public Date getDateEnreg() {
+    return dateEnreg;
+  }
+
+  public Duration getDuration() {
+    return Duration.ofMillis(duree.getTime() + getCurrentTimezoneOffset(duree));
+  }
+
+
+  public String getLieuEnreg() {
+    return lieuEnreg;
+  }
+
+  public static MagContenu fromFile(File file) {
+    try {
+      JAXBContext jaxbContext = JAXBContext.newInstance(MagContenu.class);
+      Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+      return (MagContenu) jaxbUnmarshaller.unmarshal(file);
+    } catch (JAXBException e) {
+      e.printStackTrace();
+      return null;
     }
+  }
 
-    public String getItemId() {
-        return itemId;
+  public static int getCurrentTimezoneOffset(Date d) {
+    if (timezoneOffset == -1) {
+      TimeZone tz = TimeZone.getDefault();
+      Calendar cal = GregorianCalendar.getInstance(tz);
+      timezoneOffset = tz.getOffset(d.getTime());
     }
+    return timezoneOffset;
+  }
 
-    public Date getDateEnreg() {
-        return dateEnreg;
-    }
-
-    public Date getDuree() {
-        return duree;
-    }
-
-
-    public String getLieuEnreg() {
-        return lieuEnreg;
-    }
-
-    public static MagContenu fromFile(File file) {
-        try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(MagContenu.class);
-            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-            return (MagContenu) jaxbUnmarshaller.unmarshal(file);
-        } catch (JAXBException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 }
