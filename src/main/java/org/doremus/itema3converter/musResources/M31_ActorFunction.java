@@ -22,7 +22,7 @@ import java.util.List;
 public class M31_ActorFunction extends DoremusResource {
   private List<Integer> MOP_TYPES = Arrays.asList(19, 204, 205, 230, 231, 235, 181, 248);
 
-  private static List list = null;
+  private static List<M31_ActorFunction> list = null;
 
   @CsvBindByName(column = "ID")
   private int id;
@@ -70,22 +70,20 @@ public class M31_ActorFunction extends DoremusResource {
   }
 
   public static M31_ActorFunction get(int professionID) {
+    if (professionID == 0) return null;
     if (list == null) init();
 
-    for (Object item : list) {
-      M31_ActorFunction p = (M31_ActorFunction) item;
-      if (p.id == professionID) return p;
-    }
+    for (M31_ActorFunction item : list)
+      if (item.id == professionID) return item;
     return null;
   }
 
   public static M31_ActorFunction getMorale(int typeMoraleID) {
+    if (typeMoraleID == 0) return null;
     if (list == null) init();
 
-    for (Object item : list) {
-      M31_ActorFunction p = (M31_ActorFunction) item;
-      if (p.id == typeMoraleID) return p;
-    }
+    for (M31_ActorFunction item : list)
+      if (item.id == typeMoraleID) return item;
     return null;
   }
 
@@ -144,6 +142,7 @@ public class M31_ActorFunction extends DoremusResource {
   public boolean isARecordingRole() {
     return isARecordingRole;
   }
+
   public boolean isAnEditingRole() {
     return isAnEditingRole;
   }

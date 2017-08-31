@@ -27,11 +27,11 @@ public class M42_PerformedExpressionCreation extends DoremusResource {
         // Performers
         int ipCount = 0;
         for (OmuPersonne op : OmuPersonne.byOmu(omu.getId())) {
-            M31_ActorFunction af = op.professionID > 0 ?
+          M31_ActorFunction af = op.professionID > 0 ?
                     M31_ActorFunction.get(op.professionID) :
                     M31_ActorFunction.getMorale(op.typeMoraleID);
 
-            if (af == null || !af.isInterprete()) continue;
+            if ((af == null || !af.isInterprete()) && !op.hasInstrumentOrTessiture()) continue;
 
             try {
                 M28_IndividualPerformance ip = new M28_IndividualPerformance(op, new URI(this.uri + "/" + ++ipCount));

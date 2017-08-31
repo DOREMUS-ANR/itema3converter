@@ -27,6 +27,7 @@ public class E7_Activity {
   }
 
   public Resource asResource() {
+    model.add(af.getModel());
     return model.createResource(this.uri)
       .addProperty(RDF.type, CIDOC.E7_Activity)
       .addProperty(CIDOC.P14_carried_out_by, carrier.asResource())

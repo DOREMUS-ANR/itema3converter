@@ -102,10 +102,6 @@ public class RecordConverter {
       ppc.asResource().addProperty(FRBROO.R19_created_a_realisation_of, ppw.asResource())
         .addProperty(FRBROO.R17_created, pp.asResource());
 
-      model.add(pec.getModel());
-      model.add(pe.getModel());
-      model.add(pw.getModel());
-
       peList.add(pe);
 
       // The work performed
@@ -127,6 +123,10 @@ public class RecordConverter {
         .addProperty(MUS.U54_is_performed_expression_of, f22.asResource());
       f31.asResource()
         .addProperty(FRBROO.R66_included_performed_version_of, f22.asResource());
+
+      model.add(pec.getModel());
+      model.add(pe.getModel());
+      model.add(pw.getModel());
 
       model.add(f15.getModel());
       model.add(f14.getModel());

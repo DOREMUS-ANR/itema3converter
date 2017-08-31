@@ -114,7 +114,7 @@ public class Converter {
     File mcFolder = new File(Paths.get(dataFolderPath, "MAG_CONTENU").toString());
     int i = 0;
     for (File mc : mcFolder.listFiles()) {
-//      if (!mc.getName().equals("1196138.xml")) continue;
+//      if (!mc.getName().equals("1196142.xml")) continue;
       if(++i == 10) return;
       parseRecord(mc, outputFolderPath + "/item");
     }

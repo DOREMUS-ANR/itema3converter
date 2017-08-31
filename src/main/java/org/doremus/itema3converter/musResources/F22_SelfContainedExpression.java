@@ -1,6 +1,7 @@
 package org.doremus.itema3converter.musResources;
 
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.doremus.itema3converter.files.Omu;
 import org.doremus.itema3converter.files.OmuPersonne;
 import org.doremus.itema3converter.files.OmuTypeMusicalDoc;
@@ -15,7 +16,8 @@ public class F22_SelfContainedExpression extends DoremusResource {
     super(omu);
 
     this.resource.addProperty(RDF.type, FRBROO.F22_Self_Contained_Expression)
-      .addProperty(CIDOC.P102_has_title, omu.getTitle());
+      .addProperty(CIDOC.P102_has_title, omu.getTitle())
+      .addProperty(RDFS.label, omu.getTitle());
     // TODO the title can also contain Catalogue, Opus and Key
 
     // genre

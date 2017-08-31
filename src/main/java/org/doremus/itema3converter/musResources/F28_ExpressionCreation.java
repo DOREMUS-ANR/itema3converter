@@ -42,7 +42,7 @@ public class F28_ExpressionCreation extends DoremusResource {
     // composer
     int ipCount = 0;
     for (OmuPersonne op : OmuPersonne.byOmu(omu.getId())) {
-      String activityUri = this.uri + "/" + ++ipCount;
+      String activityUri = this.uri + "/activity/" + ++ipCount;
       E7_Activity activity = new E7_Activity(activityUri, op, model);
       if (activity.getAf() != null && activity.getAf().isWorkAuthor())
         this.resource.addProperty(CIDOC.P9_consists_of, activity.asResource());
@@ -85,7 +85,7 @@ public class F28_ExpressionCreation extends DoremusResource {
     // People
     int ipCount = 0;
     for (OmuPersonne op : OmuPersonne.byOmu(this.record.getId())) {
-      String activityUri = this.uri + "/" + ++ipCount;
+      String activityUri = this.uri + "/activity/" + ++ipCount;
       E7_Activity activity = new E7_Activity(activityUri, op, model);
       if (activity.getAf() != null && activity.getAf().isAPlanningRole())
         this.resource.addProperty(CIDOC.P9_consists_of, activity.asResource());
