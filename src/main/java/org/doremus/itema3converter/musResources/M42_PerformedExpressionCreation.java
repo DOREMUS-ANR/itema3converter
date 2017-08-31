@@ -17,8 +17,7 @@ public class M42_PerformedExpressionCreation extends DoremusResource {
         this.resource.addProperty(RDF.type, MUS.M42_Performed_Expression_Creation)
                 .addProperty(CIDOC.P4_has_time_span, parent.getTimeSpan());
 
-        if (!omu.getNote().isEmpty())
-            this.resource.addProperty(CIDOC.P3_has_note, omu.getNote());
+        addNote(omu.getNote());
 
         for (E53_Place p : parent.getPlaces())
             this.resource.addProperty(CIDOC.P7_took_place_at, p.asResource());

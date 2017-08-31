@@ -4,9 +4,11 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.DCTerms;
+import org.apache.jena.vocabulary.RDFS;
 import org.doremus.itema3converter.ConstructURI;
 import org.doremus.itema3converter.RecordConverter;
 import org.doremus.itema3converter.files.Itema3File;
+import org.doremus.ontology.CIDOC;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -82,4 +84,13 @@ public abstract class DoremusResource {
     return this.identifier;
   }
 
+  protected void addNote(String text) {
+    if (text == null) return;
+    text = text.trim();
+    if (text.isEmpty()) return;
+
+    this.resource
+      .addProperty(RDFS.comment, text, "fr")
+      .addProperty(CIDOC.P3_has_note, text, "fr");
+  }
 }

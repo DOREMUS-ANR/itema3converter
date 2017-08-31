@@ -40,11 +40,9 @@ public class M28_IndividualPerformance extends DoremusResource {
 
     init();
 
-
-    this.resource
-      .addProperty(CIDOC.P3_has_note, record.activity, "fr")
-      .addProperty(CIDOC.P3_has_note, record.note, "fr")
-      .addProperty(CIDOC.P3_has_note, record.comment, "fr");
+    addNote(record.activity);
+    addNote(record.note);
+    addNote(record.comment);
   }
 
   public M28_IndividualPerformance(OmuPersonne record, URI uri) {

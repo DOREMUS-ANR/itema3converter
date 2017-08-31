@@ -80,7 +80,7 @@ public class Personne extends Itema3File {
     }
 
     public String getComment() {
-        return comment;
+        return comment.trim();
     }
 
     public String getGender() {

@@ -25,9 +25,7 @@ public class F22_SelfContainedExpression extends DoremusResource {
       this.resource.addProperty(MUS.U12_has_genre, model.createResource(GENRE_NAMESPACE + ot.musicalType));
 
     // note
-    String note = omu.workNote;
-    if (!note.isEmpty()) this.resource.addProperty(CIDOC.P3_has_note, note, "fr");
-
+    addNote(omu.workNote);
   }
 
 }

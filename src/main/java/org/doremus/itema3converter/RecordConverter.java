@@ -93,7 +93,7 @@ public class RecordConverter {
 
       f31.asResource()
         .addProperty(CIDOC.P9_consists_of, pec.asResource())
-        .addProperty(FRBROO.R17_created, pp.asResource());
+        .addProperty(FRBROO.R25_performed, pp.asResource());
       pec.asResource()
         .addProperty(CIDOC.P9i_forms_part_of, f31.asResource())
         .addProperty(FRBROO.R19_created_a_realisation_of, pw.asResource())
@@ -123,6 +123,10 @@ public class RecordConverter {
         .addProperty(MUS.U54_is_performed_expression_of, f22.asResource());
       f31.asResource()
         .addProperty(FRBROO.R66_included_performed_version_of, f22.asResource());
+
+      model.add(pp.getModel());
+      model.add(ppc.getModel());
+      model.add(ppw.getModel());
 
       model.add(pec.getModel());
       model.add(pe.getModel());
