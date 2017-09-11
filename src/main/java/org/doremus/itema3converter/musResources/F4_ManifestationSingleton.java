@@ -9,12 +9,9 @@ import org.doremus.ontology.CIDOC;
 import org.doremus.ontology.FRBROO;
 
 public class F4_ManifestationSingleton extends DoremusResource {
-  private static int countActivity;
 
   public F4_ManifestationSingleton(MagSupport support) {
     super(support);
-    countActivity = 0;
-
     this.resource.addProperty(RDF.type, FRBROO.F4_Manifestation_Singleton);
 
     // Format (i.e. CD)
@@ -34,6 +31,4 @@ public class F4_ManifestationSingleton extends DoremusResource {
         .addProperty(CIDOC.P1_is_identified_by, support.numMagneto);
     }
   }
-
-
 }

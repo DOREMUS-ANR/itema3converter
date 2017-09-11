@@ -110,10 +110,10 @@ public class Converter {
 
     // MAG_CONTENU is the first folder to parse
     File mcFolder = new File(Paths.get(dataFolderPath, "MAG_CONTENU").toString());
-    int i = 0;
+//    int i = 0;
     for (File mc : mcFolder.listFiles()) {
 //      if (!mc.getName().equals("1196142.xml")) continue;
-      if(++i == 10) return;
+//      if(++i == 10) return;
       parseRecord(mc, outputFolderPath + "/item");
     }
   }

@@ -90,7 +90,7 @@ public class M31_ActorFunction extends DoremusResource {
   public boolean isAFunction() {
     return id > 0 ?
       !MOP_TYPES.contains(id) :
-      typeMoraleID != 304;
+      typeMoraleID != 304 && typeMoraleID != 1;
   }
 
   @Override
