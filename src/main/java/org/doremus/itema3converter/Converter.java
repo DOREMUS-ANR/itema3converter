@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 public class Converter {
   static Logger log = MyLogger.getLogger(Converter.class.getName());
   public static final String UTF8_BOM = "\uFEFF";
+  public final static String SCHEMA = "http://schema.org/";
 
   public static Properties properties;
   static String dataFolderPath;
@@ -217,6 +218,8 @@ public class Converter {
     m.setNsPrefix("rdfs", RDFS.getURI());
     m.setNsPrefix("prov", PROV.getURI());
     m.setNsPrefix("time", Time.getURI());
+    m.setNsPrefix("schema", SCHEMA);
+
 
     // Write the output file
     FileWriter out = new FileWriter(filename);

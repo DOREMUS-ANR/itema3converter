@@ -11,13 +11,13 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.doremus.itema3converter.ConstructURI;
 import org.doremus.itema3converter.Converter;
-import org.doremus.itema3converter.RecordConverter;
 import org.doremus.itema3converter.files.Personne;
 import org.doremus.ontology.CIDOC;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -106,14 +106,36 @@ public class E21_Person extends DoremusResource {
     addProperty(RDFS.label, this.getFullName());
     addProperty(CIDOC.P131_is_identified_by, this.getIdentification());
 
-    addProperty(CIDOC.P98i_was_born, formatDate(birthDate, birthYear));
-    addProperty(CIDOC.P100i_died_in, formatDate(deathDate, deathYear));
-
+    try {
+      addDate(formatDate(birthDate, birthYear), false);
+      addDate(formatDate(deathDate, deathYear), true);
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
+    }
 
     addNote(this.record.getComment());
     addProperty(FOAF.gender, this.record.getGender(), "en");
     return resource;
   }
+
+  private void addDate(Literal date, boolean isDeath) throws URISyntaxException {
+    if(date == null) return;
+
+    String url = this.uri + (isDeath ? "/death" : "/birth");
+
+    E52_TimeSpan ts = new E52_TimeSpan(new URI(url + "/interval"), date, date);
+    Property schemaProp = model.createProperty(Converter.SCHEMA + (isDeath ? "deathDate" : "birthDate"));
+
+    this.resource.addProperty(isDeath ? CIDOC.P100i_died_in : CIDOC.P98i_was_born,
+      model.createResource(url)
+        .addProperty(RDF.type, isDeath ? CIDOC.E69_Death : CIDOC.E67_Birth)
+        .addProperty(CIDOC.P4_has_time_span, ts.asResource())
+    );
+
+    this.resource.addProperty(schemaProp, ts.getStart());
+    model.add(ts.getModel());
+  }
+
 
   public void addProperty(Property property, Literal object) {
     if (property == null || object == null) return;
@@ -182,6 +204,5 @@ public class E21_Person extends DoremusResource {
     }
 
   }
-
 
 }

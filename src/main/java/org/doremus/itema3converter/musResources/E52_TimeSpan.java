@@ -14,8 +14,13 @@ import java.util.Date;
 
 public class E52_TimeSpan extends DoremusResource {
   public static final DateFormat ISODateFormat = new SimpleDateFormat("yyyy-MM-dd");
+  private Literal start, end;
 
   private Precision quality;
+
+  public Literal getStart() {
+    return start;
+  }
 
 
   public enum Precision {
@@ -44,6 +49,9 @@ public class E52_TimeSpan extends DoremusResource {
     String label = start.toInstant().toString().substring(0, 10);
     if (!end.equals(start)) label += "/" + end.toInstant().toString().substring(0, 10);
 
+    this.start = model.createTypedLiteral(ISODateFormat.format(start), XSDDatatype.XSDdate);
+    this.end = model.createTypedLiteral(ISODateFormat.format(end), XSDDatatype.XSDdate);
+
     this.resource = model.createResource(uri.toString())
       .addProperty(RDF.type, CIDOC.E52_Time_Span)
       .addProperty(RDF.type, Time.Interval)
@@ -51,14 +59,16 @@ public class E52_TimeSpan extends DoremusResource {
       .addProperty(Time.hasBeginning,
         model.createResource()
           .addProperty(RDF.type, Time.Instant)
-          .addProperty(Time.inXSDDate, ISODateFormat.format(start), XSDDatatype.XSDdate))
+          .addProperty(Time.inXSDDate, this.start))
       .addProperty(Time.hasEnd, model.createResource()
         .addProperty(RDF.type, Time.Instant)
-        .addProperty(Time.inXSDDate, ISODateFormat.format(start), XSDDatatype.XSDdate));
+        .addProperty(Time.inXSDDate, this.end));
   }
 
   public E52_TimeSpan(URI uri, Literal start, Literal end) {
     super(uri);
+    this.start = start;
+    this.end = end;
 
     String label = start.toString();
     if (end != null && !end.equals(start)) label += "/" + end.toString();
