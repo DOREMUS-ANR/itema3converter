@@ -103,6 +103,18 @@ task schemagenCidoc(type: UrlSchemaGen) {
     namespace = 'http://erlangen-crm.org/current/'
 }
 
+task schemagenTime(type: UrlSchemaGen) {
+    input = uri('https://raw.githubusercontent.com/w3c/sdw/gh-pages/time/rdf/time.ttl')
+    outputDirectory = file('src/main/java/')
+    packageName = 'org.doremus.ontology'
+    classNameSuffix = 'Time'
+    ontology = true
+    inference = true
+    nostrict = true
+    nocomments = true
+    namespace = 'http://www.w3.org/2006/time#'
+}
+
 task updateVocabularies(type: JavaExec) {
     main = "org.doremus.vocabulary.Sync"
     classpath = sourceSets.main.runtimeClasspath

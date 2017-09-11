@@ -10,6 +10,7 @@ import org.doremus.itema3converter.files.Morale;
 import org.doremus.ontology.CIDOC;
 import org.doremus.ontology.FRBROO;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,14 +60,14 @@ public class F11_Corporate_Body extends DoremusResource {
       this.resource.addProperty(CIDOC.P95i_was_formed_by,
         model.createResource(this.uri + "/formation")
           .addProperty(RDF.type, CIDOC.E66_Formation)
-          .addProperty(CIDOC.P4_has_time_span, toTimeSpan(birthDate, this.uri + "/formation/time"))
+          .addProperty(CIDOC.P4_has_time_span, toTimeSpan(birthDate, this.uri + "/formation/interval").asResource())
       );
     }
     if (deathDate != null) {
       this.resource.addProperty(CIDOC.P99i_was_dissolved_by,
         model.createResource(this.uri + "/dissolution")
           .addProperty(RDF.type, CIDOC.E68_Dissolution)
-          .addProperty(CIDOC.P4_has_time_span, toTimeSpan(deathDate, this.uri + "/dissolution/time"))
+          .addProperty(CIDOC.P4_has_time_span, toTimeSpan(deathDate, this.uri + "/dissolution/interval").asResource())
       );
     }
 
@@ -80,14 +81,17 @@ public class F11_Corporate_Body extends DoremusResource {
     return resource;
   }
 
-  private Resource toTimeSpan(String date, String uri) {
+  private E52_TimeSpan toTimeSpan(String date, String uri) {
     date = date
       .replace("Janvier ", "01/")
       .replace("Mai ", "05/")
       .replace("Septembre ", "09/")
       .trim();
 
+    E52_TimeSpan ts;
+
     Literal d = null, dEnd = null;
+    E52_TimeSpan.Precision precision = null;
     String note = null;
     if (date.matches("\\d{4}")) { // 1937
       d = model.createTypedLiteral(date, XSDDatatype.XSDgYear);
@@ -123,6 +127,7 @@ public class F11_Corporate_Body extends DoremusResource {
       if (startYear != null) {
         d = model.createTypedLiteral(startYear, XSDDatatype.XSDgYear);
         dEnd = model.createTypedLiteral(endYear, XSDDatatype.XSDgYear);
+        precision = E52_TimeSpan.Precision.DECADE;
       }
     } else if (date.contains("-") || date.contains("/")) {
       note = date;
@@ -130,21 +135,29 @@ public class F11_Corporate_Body extends DoremusResource {
       String startYear = parts[0].trim(),
         endYear = parts[1].trim();
 
-      if (startYear.length() == 3) startYear += "0";
+      if (startYear.length() == 3) {
+        startYear += "0";
+        precision = E52_TimeSpan.Precision.DECADE;
+      }
       if (startYear.length() != 0) d = model.createTypedLiteral(startYear, XSDDatatype.XSDgYear);
 
-      if (endYear.length() == 3) endYear += "9";
+      if (endYear.length() == 3) {
+        endYear += "9";
+        precision = E52_TimeSpan.Precision.DECADE;
+      }
       if (endYear.length() != 0) dEnd = model.createTypedLiteral(endYear, XSDDatatype.XSDgYear);
     } else
       note = date;
 
-    Resource ts = model.createResource(uri)
-      .addProperty(RDF.type, CIDOC.E52_Time_Span);
-    if (d != null) ts.addProperty(CIDOC.P79_beginning_is_qualified_by, d);
-    if (dEnd != null) ts.addProperty(CIDOC.P80_end_is_qualified_by, dEnd);
-
+    try {
+      ts = new E52_TimeSpan(new URI(uri), d, dEnd);
+      ts.setQuality(precision);
+      model.add(ts.getModel());
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
+      return null;
+    }
     addNote(note);
-
     return ts;
   }
 

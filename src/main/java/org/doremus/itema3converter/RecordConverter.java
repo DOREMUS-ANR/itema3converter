@@ -16,8 +16,6 @@ import org.doremus.ontology.PROV;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,7 +28,6 @@ public class RecordConverter {
   public static Resource RadioFrance;
   //    public static final DateFormat ISODateTimeFormat = new SimpleDateFormat("yyyy-MM-ddThh:mm:ss");
 //    public static final DateFormat ISOTimeFormat = new SimpleDateFormat("hh:mm:ss");
-  public static final DateFormat ISODateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
   private static Logger log = MyLogger.getLogger(RecordConverter.class.getName());
   private Resource provEntity, provActivity;
@@ -141,7 +138,7 @@ public class RecordConverter {
     // Recording
     F29_RecordingEvent re = new F29_RecordingEvent(item);
     for (E53_Place place : f31.getPlaces()) re.setPlace(place);
-    re.setTimeSpan(f31.getTimeSpan());
+    re.setTimeSpan(f31.getTimeSpan().asResource());
     F21_RecordingWork rw = new F21_RecordingWork(item);
     F26_Recording rc = new F26_Recording(mag);
 
@@ -212,7 +209,7 @@ public class RecordConverter {
           .addProperty(MUS.U51_is_partial_or_full_recording_of, currentPe.asResource());
         model.add(t.getModel());
         tracks.remove(t);
-        System.out.println("-- " + t.title+ " | " + t.timecode);
+        System.out.println("-- " + t.title + " | " + t.timecode);
 
         if (tracks.isEmpty()) break;
         t = tracks.get(0);

@@ -11,10 +11,7 @@ import org.doremus.itema3converter.files.Personne;
 import org.doremus.itema3converter.musResources.E21_Person;
 import org.doremus.itema3converter.musResources.E53_Place;
 import org.doremus.itema3converter.musResources.F11_Corporate_Body;
-import org.doremus.ontology.CIDOC;
-import org.doremus.ontology.FRBROO;
-import org.doremus.ontology.MUS;
-import org.doremus.ontology.PROV;
+import org.doremus.ontology.*;
 import org.doremus.vocabulary.VocabularyManager;
 import org.geonames.*;
 
@@ -219,6 +216,7 @@ public class Converter {
     m.setNsPrefix("foaf", FOAF.getURI());
     m.setNsPrefix("rdfs", RDFS.getURI());
     m.setNsPrefix("prov", PROV.getURI());
+    m.setNsPrefix("time", Time.getURI());
 
     // Write the output file
     FileWriter out = new FileWriter(filename);

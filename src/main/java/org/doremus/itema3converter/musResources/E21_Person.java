@@ -137,7 +137,7 @@ public class E21_Person extends DoremusResource {
     String label;
     XSDDatatype type;
     if (d != null) {
-      label = RecordConverter.ISODateFormat.format(d);
+      label = E52_TimeSpan.ISODateFormat.format(d);
       type = XSDDatatype.XSDdate;
     } else if (fallback != null && !fallback.isEmpty()) {
       label = fallback;

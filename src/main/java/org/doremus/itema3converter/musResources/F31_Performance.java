@@ -1,12 +1,10 @@
 package org.doremus.itema3converter.musResources;
 
-import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.doremus.itema3converter.ConstructURI;
-import org.doremus.itema3converter.RecordConverter;
 import org.doremus.itema3converter.files.*;
 import org.doremus.ontology.CIDOC;
 import org.doremus.ontology.FRBROO;
@@ -21,7 +19,7 @@ import java.util.stream.Collectors;
 
 public class F31_Performance extends DoremusResource {
   final static List<Integer> performanceProfession = Arrays.asList(13, 205, 2, 10, 7);
-  private final Resource timeSpan;
+  private E52_TimeSpan timeSpan;
   private List<E53_Place> placesList;
 
   public F31_Performance(MagContenu mag, Item item) {
@@ -34,14 +32,15 @@ public class F31_Performance extends DoremusResource {
     Date end = mag.getDateEnreg();
 
 
-    timeSpan = model.createResource(this.uri + "/time")
-      .addProperty(RDF.type, CIDOC.E52_Time_Span)
-      .addProperty(RDFS.label, start.toInstant().toString().substring(0, 10))
-      .addProperty(CIDOC.P79_beginning_is_qualified_by, RecordConverter.ISODateFormat.format(start),
-        XSDDatatype.XSDdate)
-      .addProperty(CIDOC.P80_end_is_qualified_by, RecordConverter.ISODateFormat.format(end), XSDDatatype
-        .XSDdate);
-    this.resource.addProperty(CIDOC.P4_has_time_span, timeSpan);
+    try {
+      timeSpan = new E52_TimeSpan(new URI(this.uri + "/interval"), start, end);
+      this.resource.addProperty(CIDOC.P4_has_time_span, timeSpan.asResource());
+      model.add(timeSpan.getModel());
+
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
+    }
+
 
     // Performance: Place
     this.placesList = new ArrayList<>();
@@ -96,7 +95,7 @@ public class F31_Performance extends DoremusResource {
 
     // for (Resource x : actors) {
     // FIXME the property U21 is not yet in the ontology
-    // this.resource.addProperty(MUS.U21_is_about_actor, x.asResource());
+//     this.resource.addProperty(MUS.U21_is_about_actor, x.asResource());
     // }
 
     // Performance: comment
@@ -127,7 +126,7 @@ public class F31_Performance extends DoremusResource {
     return placesList;
   }
 
-  public Resource getTimeSpan() {
+  public E52_TimeSpan getTimeSpan() {
     return timeSpan;
   }
 }
