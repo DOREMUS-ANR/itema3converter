@@ -34,6 +34,7 @@ public class F29_RecordingEvent extends DoremusResource {
       if (!af.isARecordingRole()) continue;
       E21_Person person = new E21_Person(ip.personneId);
       addActivity(person.asResource(), af.asResource());
+      model.add(af.getModel());
     }
   }
 
@@ -60,6 +61,7 @@ public class F29_RecordingEvent extends DoremusResource {
         .addProperty(CIDOC.P14_carried_out_by, actor)
         .addProperty(MUS.U31_had_function_of_type, function)
     );
+
   }
 
 

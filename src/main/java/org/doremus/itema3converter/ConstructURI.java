@@ -72,7 +72,7 @@ public class ConstructURI {
       case "prov":
         return "activity";
       case "M31_ActorFunction":
-      case "M31_ActorResponsibility":
+      case "M32_ActorResponsibility":
         return "function";
       case "M14_MediumOfPerformance":
         return "mop";
