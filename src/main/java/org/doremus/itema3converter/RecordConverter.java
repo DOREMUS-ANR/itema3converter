@@ -74,6 +74,7 @@ public class RecordConverter {
     addProvenanceTo(f31);
 
     List<M43_PerformedExpression> peList = new ArrayList<>();
+    List<F22_SelfContainedExpression> f22List = new ArrayList<>();
 
     // Performed expression for this performance
     for (ItemOmu io : ItemOmu.byItem(item.getId())) {
@@ -120,6 +121,8 @@ public class RecordConverter {
         .addProperty(MUS.U54_is_performed_expression_of, f22.asResource());
       f31.asResource()
         .addProperty(FRBROO.R66_included_performed_version_of, f22.asResource());
+
+      f22List.add(f22);
 
       model.add(pp.getModel());
       model.add(ppc.getModel());
@@ -174,6 +177,9 @@ public class RecordConverter {
       ms.asResource()
         .addProperty(CIDOC.P128_carries, rc.asResource())
         .addProperty(CIDOC.P165_incorporates, set.asResource());
+
+      for (F22_SelfContainedExpression exp : f22List)
+        ms.asResource().addProperty(CIDOC.P128_carries, exp.asResource());
 
       model.add(ms.getModel());
     }
