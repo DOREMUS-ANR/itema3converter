@@ -31,7 +31,7 @@ public class Omu extends Itema3File {
   }
 
   public String getNote() {
-    return note;
+    return note.trim();
   }
 
   public String getTitle() {

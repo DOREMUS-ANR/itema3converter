@@ -13,7 +13,7 @@ import org.doremus.itema3converter.musResources.E53_Place;
 import org.doremus.itema3converter.musResources.F11_Corporate_Body;
 import org.doremus.ontology.*;
 import org.doremus.vocabulary.VocabularyManager;
-import org.geonames.*;
+import org.geonames.Toponym;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
@@ -31,7 +31,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Properties;
-import java.util.TimeZone;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -69,7 +68,6 @@ public class Converter {
     if (!dataFolder.exists()) {
       log.info("Pre-processing data. It will be needed only the first time");
       for (File f : inputFolder.listFiles())
-//      if (f.getName().equals("SEQUENCE.xml"))
         fileToFolder(f);
       log.info("End Pre-processing\n\n");
     }
@@ -112,7 +110,7 @@ public class Converter {
     File mcFolder = new File(Paths.get(dataFolderPath, "MAG_CONTENU").toString());
 //    int i = 0;
     for (File mc : mcFolder.listFiles()) {
-//      if (!mc.getName().equals("1196142.xml")) continue;
+//      if (!mc.getName().equals("1196146.xml")) continue;
 //      if(++i == 10) return;
       parseRecord(mc, outputFolderPath + "/item");
     }
@@ -140,9 +138,18 @@ public class Converter {
     }
   }
 
+  public static void parseOrganization(String id) {
+    File f = new File(Paths.get(dataFolderPath, "MORALE", id + ".xml").toString());
+    parseOrganization(f, outputFolderPath + "/organization", true);
+  }
+
   private static void parseOrganization(File p, String outputFolder) {
+    parseOrganization(p, outputFolder, false);
+  }
+
+  private static void parseOrganization(File p, String outputFolder, boolean force) {
     Morale mr = Morale.fromFile(p);
-    if (mr.getStatus() != 1) return;
+    if (!force && mr.getStatus() != 1) return;
     try {
       F11_Corporate_Body cb = new F11_Corporate_Body(mr);
       log.info("Corporate : " + mr.getId() + " " + cb.getName());
@@ -155,6 +162,12 @@ public class Converter {
       e.printStackTrace();
     }
   }
+
+  public static boolean organizationExists(String id) {
+    File f = new File(outputFolderPath + "/organization/" + id + ".ttl");
+    return f.exists();
+  }
+
 
   private static void parsePlace(File p, String outputFolder) {
     Model m = ModelFactory.createDefaultModel();
@@ -275,7 +288,7 @@ public class Converter {
           id = mi.group(1) + "_" + id;
         }
         // idem for MAG_SUPPORT and SEQUENCE
-        if (fileName.equals("MAG_SUPPORT") ||  fileName.equals("SEQUENCE")) {
+        if (fileName.equals("MAG_SUPPORT") || fileName.equals("SEQUENCE")) {
           Matcher mm = mag_id.matcher(recordString);
           mm.find();
           id = mm.group(1) + "_" + id;

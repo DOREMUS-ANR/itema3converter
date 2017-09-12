@@ -29,12 +29,13 @@ public class M42_PerformedExpressionCreation extends DoremusResource {
         M31_ActorFunction.get(op.professionID) :
         M31_ActorFunction.getMorale(op.typeMoraleID);
 
+//      System.out.println(op.typeMoraleID);
       if ((af == null || !af.isInterprete()) && !op.hasInstrumentOrTessiture()) continue;
 
       try {
         M28_IndividualPerformance ip = new M28_IndividualPerformance(op, new URI(this.uri + "/" + ++ipCount));
-        model.add(ip.getModel());
         this.resource.addProperty(CIDOC.P9_consists_of, ip.asResource());
+        model.add(ip.getModel());
       } catch (URISyntaxException e) {
         e.printStackTrace();
       }

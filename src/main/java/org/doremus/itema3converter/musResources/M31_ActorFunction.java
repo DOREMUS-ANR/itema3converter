@@ -21,6 +21,7 @@ import java.util.List;
 
 public class M31_ActorFunction extends DoremusResource {
   private List<Integer> MOP_TYPES = Arrays.asList(19, 204, 205, 230, 231, 235, 181, 248);
+  private List<Integer> MORALE_MOP_TYPES = Arrays.asList(1, 2, 304);
 
   private static List<M31_ActorFunction> list = null;
 
@@ -83,14 +84,14 @@ public class M31_ActorFunction extends DoremusResource {
     if (list == null) init();
 
     for (M31_ActorFunction item : list)
-      if (item.id == typeMoraleID) return item;
+      if (item.typeMoraleID == typeMoraleID) return item;
     return null;
   }
 
   public boolean isAFunction() {
     return id > 0 ?
       !MOP_TYPES.contains(id) :
-      typeMoraleID != 304 && typeMoraleID != 1;
+      !MORALE_MOP_TYPES.contains(typeMoraleID);
   }
 
   @Override
@@ -115,7 +116,8 @@ public class M31_ActorFunction extends DoremusResource {
         cName = "M14_MediumOfPerformance";
         cClass = MUS.M14_Medium_Of_Performance;
       }
-      this.uri = ConstructURI.build(this.sourceDb, cName, this.getFunctionId());
+      String appendix = this.typeMoraleID > 0 ? "m" : "";
+      this.uri = ConstructURI.build(this.sourceDb, cName, this.getFunctionId() + appendix);
       this.resource = model.createResource(this.uri.toString())
         .addProperty(RDF.type, cClass)
         .addProperty(RDFS.label, this.label, "fr");

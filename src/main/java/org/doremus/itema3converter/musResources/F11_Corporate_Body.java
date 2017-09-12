@@ -6,6 +6,7 @@ import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.doremus.itema3converter.Converter;
 import org.doremus.itema3converter.files.Morale;
 import org.doremus.ontology.CIDOC;
 import org.doremus.ontology.FRBROO;
@@ -33,6 +34,8 @@ public class F11_Corporate_Body extends DoremusResource {
 
   public F11_Corporate_Body(String id) {
     super(id);
+    if (!Converter.organizationExists(id))
+      Converter.parseOrganization(id);
   }
 
   public String getName() {

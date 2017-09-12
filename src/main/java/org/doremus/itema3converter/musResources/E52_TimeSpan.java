@@ -46,9 +46,8 @@ public class E52_TimeSpan extends DoremusResource {
   public E52_TimeSpan(URI uri, Date start, Date end) {
     super(uri);
 
-    String label = start.toInstant().toString().substring(0, 10);
-    if (!end.equals(start)) label += "/" + end.toInstant().toString().substring(0, 10);
-
+    String label = ISODateFormat.format(start).substring(0, 10);
+    if (!end.equals(start)) label += "/" + ISODateFormat.format(end).substring(0, 10);
     this.start = model.createTypedLiteral(ISODateFormat.format(start), XSDDatatype.XSDdate);
     this.end = model.createTypedLiteral(ISODateFormat.format(end), XSDDatatype.XSDdate);
 

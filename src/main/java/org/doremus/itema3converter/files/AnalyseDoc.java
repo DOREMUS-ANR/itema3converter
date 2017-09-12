@@ -26,7 +26,7 @@ public class AnalyseDoc extends Itema3File {
 
     public static AnalyseDoc fromFile(File file) {
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(ItemIdxGeo.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(AnalyseDoc.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
             return (AnalyseDoc) jaxbUnmarshaller.unmarshal(file);
         } catch (JAXBException e) {

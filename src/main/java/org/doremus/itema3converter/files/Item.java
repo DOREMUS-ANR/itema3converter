@@ -20,7 +20,7 @@ public class Item extends Itema3File {
   private String label;
   @XmlElement(name = "ITEM_DESCRIPTION")
   private String description;
-  @XmlElement(name = "ITEM_ANALYSE_DOC_ID")
+  @XmlElement(name = "ANALYSE_DOC_ID")
   private String analyseDocId;
 
 
