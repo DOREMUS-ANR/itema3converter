@@ -47,6 +47,7 @@ public class MagContenu extends Itema3File {
   }
 
   public Duration getDuration() {
+    if (duree == null) return null;
     return Duration.ofMillis(duree.getTime() + getCurrentTimezoneOffset(duree));
   }
 

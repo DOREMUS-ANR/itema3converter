@@ -35,11 +35,11 @@ public class ItemIdxMorale extends ItemIdxFile {
         return null;
     }
 
-    private static ItemIdxNc fromFile(File file) {
+    private static ItemIdxMorale fromFile(File file) {
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(ItemIdxNc.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(ItemIdxMorale.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-            return (ItemIdxNc) jaxbUnmarshaller.unmarshal(file);
+            return (ItemIdxMorale) jaxbUnmarshaller.unmarshal(file);
         } catch (JAXBException e) {
             e.printStackTrace();
             return null;

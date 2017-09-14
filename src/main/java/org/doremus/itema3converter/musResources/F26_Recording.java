@@ -27,7 +27,8 @@ public class F26_Recording extends DoremusResource {
     );
 
     // Duration
-    this.resource.addProperty(MUS.U53_has_duration, mag.getDuration().toString(), XSDDatatype.XSDdayTimeDuration);
+    if (mag.getDuration() != null)
+      this.resource.addProperty(MUS.U53_has_duration, mag.getDuration().toString(), XSDDatatype.XSDdayTimeDuration);
   }
 
 }

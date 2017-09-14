@@ -11,6 +11,7 @@ public class M46_Set_of_Tracks extends DoremusResource {
     this.resource.addProperty(RDF.type, MUS.M46_Set_of_Tracks);
 
     // Duration
-    this.resource.addProperty(MUS.U53_has_duration, mag.getDuration().toString(), XSDDatatype.XSDdayTimeDuration);
+    if (mag.getDuration() != null)
+      this.resource.addProperty(MUS.U53_has_duration, mag.getDuration().toString(), XSDDatatype.XSDdayTimeDuration);
   }
 }

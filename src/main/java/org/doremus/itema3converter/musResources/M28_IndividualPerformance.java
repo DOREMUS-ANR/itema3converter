@@ -61,14 +61,13 @@ public class M28_IndividualPerformance extends DoremusResource {
   }
 
   private void init() {
-    OntClass resClass = personneID.isEmpty() ? FRBROO.F31_Performance : MUS.M28_Individual_Performance;
     DoremusResource carrier = personneID.isEmpty() ? new F11_Corporate_Body(moraleID) : new E21_Person(personneID);
 
     M31_ActorFunction af = professionID > 0 ?
       M31_ActorFunction.get(professionID) :
       M31_ActorFunction.getMorale(typeMoraleID);
 
-    this.resource.addProperty(RDF.type, resClass)
+    this.resource.addProperty(RDF.type, MUS.M28_Individual_Performance)
       .addProperty(CIDOC.P14_carried_out_by, carrier.asResource());
 
     if (af != null) {

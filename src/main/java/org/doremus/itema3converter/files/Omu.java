@@ -10,6 +10,9 @@ import java.io.File;
 @SuppressWarnings("unused")
 @XmlRootElement(name = "DATA_RECORD")
 public class Omu extends Itema3File {
+  private static final String workCommentRegex = "(?i)^(Oeuvre (?!découpée)|Pour (?!le)).+";
+  private static final String premiereRegex = "(^c|.*C)réation mondiale.+";
+
   @XmlElement(name = "OMU_ID")
   private String id;
   @XmlElement(name = "OMU_TITRE")
@@ -30,8 +33,18 @@ public class Omu extends Itema3File {
     return id;
   }
 
-  public String getNote() {
-    return note.trim();
+  public String getNote(String aClass) {
+    note = note.trim();
+    if (aClass == null) return note;
+
+    if (note.matches(workCommentRegex))
+      return aClass.equals("F22_SelfContainedExpression") ? note : null;
+    else
+      return aClass.equals("F22_SelfContainedExpression") ? null : note;
+  }
+
+  public boolean containsPremiere() {
+    return note.matches(premiereRegex);
   }
 
   public String getTitle() {

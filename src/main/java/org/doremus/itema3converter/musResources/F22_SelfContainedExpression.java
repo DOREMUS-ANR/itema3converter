@@ -26,6 +26,7 @@ public class F22_SelfContainedExpression extends DoremusResource {
 
     // note
     addNote(omu.workNote);
+    addNote(omu.getNote(this.className));
   }
 
 }

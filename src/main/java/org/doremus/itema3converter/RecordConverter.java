@@ -122,6 +122,13 @@ public class RecordConverter {
       f31.asResource()
         .addProperty(FRBROO.R66_included_performed_version_of, f22.asResource());
 
+      if (omu.containsPremiere()) {
+        f22.asResource()
+          .addProperty(MUS.U5_had_premiere, f31.asResource());
+        f14.asResource()
+          .addProperty(MUS.U5_had_premiere, f31.asResource());
+      }
+
       f22List.add(f22);
 
       model.add(pp.getModel());
@@ -199,6 +206,7 @@ public class RecordConverter {
 
     // assing PerformedExpression to Track
     for (int i = 0; i < peList.size(); i++) {
+      if (tracks.isEmpty()) break;
 
       M43_PerformedExpression currentPe = peList.get(i);
       System.out.println(currentPe.title + " | " + currentPe.timecode);

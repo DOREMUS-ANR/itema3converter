@@ -17,7 +17,7 @@ public class M42_PerformedExpressionCreation extends DoremusResource {
     this.resource.addProperty(RDF.type, MUS.M42_Performed_Expression_Creation)
       .addProperty(CIDOC.P4_has_time_span, parent.getTimeSpan().asResource());
 
-    addNote(omu.getNote());
+    addNote(omu.getNote(this.className));
 
     for (E53_Place p : parent.getPlaces())
       this.resource.addProperty(CIDOC.P7_took_place_at, p.asResource());
@@ -29,7 +29,6 @@ public class M42_PerformedExpressionCreation extends DoremusResource {
         M31_ActorFunction.get(op.professionID) :
         M31_ActorFunction.getMorale(op.typeMoraleID);
 
-//      System.out.println(op.typeMoraleID);
       if ((af == null || !af.isInterprete()) && !op.hasInstrumentOrTessiture()) continue;
 
       try {

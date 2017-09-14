@@ -22,7 +22,7 @@ public class M29_Editing extends DoremusResource {
     List<ItemEmission> emissions = ItemEmission.byItem(item.getId());
     if (!emissions.isEmpty()) {
       Emission emission = emissions.get(0).getEmission();
-      if (emission.num != 1107)
+      if (emission != null && emission.num != 1107)
         addActivity(RecordConverter.RadioFrance, "Editeur");
     }
 
