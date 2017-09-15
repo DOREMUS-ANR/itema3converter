@@ -96,9 +96,13 @@ public class RecordConverter {
         .addProperty(CIDOC.P9i_forms_part_of, f31.asResource())
         .addProperty(FRBROO.R19_created_a_realisation_of, pw.asResource())
         .addProperty(FRBROO.R17_created, pe.asResource());
-      pw.asResource().addProperty(FRBROO.R9_is_realised_in, pe.asResource());
-      ppc.asResource().addProperty(FRBROO.R19_created_a_realisation_of, ppw.asResource())
+      pw.asResource()
+        .addProperty(FRBROO.R9_is_realised_in, pe.asResource());
+      ppc.asResource()
+        .addProperty(FRBROO.R19_created_a_realisation_of, ppw.asResource())
         .addProperty(FRBROO.R17_created, pp.asResource());
+      ppw.asResource()
+        .addProperty(FRBROO.R9_is_realised_in, pp.asResource());
 
       peList.add(pe);
 
