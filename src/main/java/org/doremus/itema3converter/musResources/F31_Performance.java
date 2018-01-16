@@ -104,8 +104,9 @@ public class F31_Performance extends DoremusResource {
     // }
 
     // Performance: comment
-    for (String s : new String[]{item.getDescription(), item.getAnalyseDoc()})
-      addNote(s);
+    for (String s : new String[]{item.getDescription(), item.getAnalyseDoc()}) {
+      if (!"?".equals(s)) addNote(s);
+    }
 
     // Performance: invited
     int invI = 0;
