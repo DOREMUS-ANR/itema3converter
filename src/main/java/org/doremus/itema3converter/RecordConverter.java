@@ -108,15 +108,10 @@ public class RecordConverter {
       peList.add(pe);
 
       // The work performed
-      F15_ComplexWork f15 = new F15_ComplexWork(omu);
       F14_IndividualWork f14 = new F14_IndividualWork(omu);
       F28_ExpressionCreation f28 = new F28_ExpressionCreation(omu, false);
       F22_SelfContainedExpression f22 = new F22_SelfContainedExpression(omu);
 
-      f15.asResource()
-        .addProperty(FRBROO.R10_has_member, f14.asResource())
-        .addProperty(MUS.U38_has_descriptive_expression, f22.asResource())
-        .addProperty(FRBROO.R3_is_realised_in, pe.asResource());
       f14.asResource()
         .addProperty(FRBROO.R9_is_realised_in, f22.asResource());
       f28.asResource()
@@ -144,7 +139,6 @@ public class RecordConverter {
       model.add(pe.getModel());
       model.add(pw.getModel());
 
-      model.add(f15.getModel());
       model.add(f14.getModel());
       model.add(f28.getModel());
       model.add(f22.getModel());
