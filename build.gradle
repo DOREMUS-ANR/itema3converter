@@ -16,6 +16,7 @@ configurations.all {
 
 repositories {
     jcenter()
+    maven { url 'https://jitpack.io' }
     flatDir {
         dirs 'libs'
     }
@@ -27,7 +28,7 @@ dependencies {
             'org.apache.jena:apache-jena-libs:3.1.0',
             'org.geonames:geonames:1.0',
             'com.opencsv:opencsv:3.10',
-            'org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5'
+            'com.github.DOREMUS-ANR:string2vocabulary:0.1'
 }
 
 run {

@@ -36,7 +36,7 @@ public class RecordConverter {
 
 
   public RecordConverter(File mc) throws URISyntaxException {
-    log.setLevel(Level.OFF);
+    log.setLevel(Level.WARNING);
 
     model = ModelFactory.createDefaultModel();
     RadioFrance = model.createResource("http://data.doremus.org/organization/Radio_France");
@@ -208,7 +208,7 @@ public class RecordConverter {
       if (tracks.isEmpty()) break;
 
       M43_PerformedExpression currentPe = peList.get(i);
-      System.out.println(currentPe.title + " | " + currentPe.timecode);
+      log.info(currentPe.title + " | " + currentPe.timecode);
 
       int threshold;
       if (i == peList.size() - 1) //last one
@@ -222,7 +222,7 @@ public class RecordConverter {
           .addProperty(MUS.U51_is_partial_or_full_recording_of, currentPe.asResource());
         model.add(t.getModel());
         tracks.remove(t);
-        System.out.println("-- " + t.title + " | " + t.timecode);
+        log.info("-- " + t.title + " | " + t.timecode);
 
         if (tracks.isEmpty()) break;
         t = tracks.get(0);

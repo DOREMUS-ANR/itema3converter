@@ -12,7 +12,7 @@ import org.doremus.itema3converter.musResources.E21_Person;
 import org.doremus.itema3converter.musResources.E53_Place;
 import org.doremus.itema3converter.musResources.F11_Corporate_Body;
 import org.doremus.ontology.*;
-import org.doremus.vocabulary.VocabularyManager;
+import org.doremus.string2vocabulary.VocabularyManager;
 import org.geonames.Toponym;
 
 import javax.xml.namespace.QName;
@@ -53,7 +53,10 @@ public class Converter {
 
     GeoNames.loadCache();
     E21_Person.loadCache();
-    VocabularyManager.init();
+
+    ClassLoader classLoader = Converter.class.getClassLoader();
+    VocabularyManager.setVocabularyFolder(classLoader.getResource("vocabulary").getPath());
+    VocabularyManager.init(classLoader.getResource("property2family.csv"));
 
     System.out.println("\n\n");
     // end INIT
