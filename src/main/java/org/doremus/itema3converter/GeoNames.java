@@ -46,7 +46,6 @@ public class GeoNames {
     }
 
     public static Toponym query(LieuGeo lg) {
-        String label = lg.getId();
         String compl = null;
         String featureCode = null;
         switch (lg.getQualif()) {
@@ -88,7 +87,7 @@ public class GeoNames {
                 compl = lg.getQualif();
         }
 
-        return GeoNames.query(label, lg.getLabel(), featureCode, compl);
+        return GeoNames.query(lg.getId(), lg.getLabel(), featureCode, compl);
     }
 
     public static Toponym query(String id, String label, String featureCode, String complement) {
