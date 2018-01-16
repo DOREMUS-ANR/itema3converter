@@ -92,6 +92,7 @@ public class RecordConverter {
       f31.asResource()
         .addProperty(CIDOC.P9_consists_of, pec.asResource())
         .addProperty(FRBROO.R25_performed, pp.asResource());
+      f31.getPlan().addProperty(FRBROO.R5_has_component, pp.asResource());
       pec.asResource()
         .addProperty(CIDOC.P9i_forms_part_of, f31.asResource())
         .addProperty(FRBROO.R19_created_a_realisation_of, pw.asResource())

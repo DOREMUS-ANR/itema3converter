@@ -21,10 +21,15 @@ public class F31_Performance extends DoremusResource {
   final static List<Integer> performanceProfession = Arrays.asList(13, 205, 2, 10, 7);
   private E52_TimeSpan timeSpan;
   private List<E53_Place> placesList;
+  private F25_PerformancePlan plan;
 
   public F31_Performance(MagContenu mag, Item item) {
     super(mag);
     this.resource.addProperty(RDF.type, FRBROO.F31_Performance);
+
+    this.plan = new F25_PerformancePlan(mag);
+    this.resource.addProperty(FRBROO.R25_performed, this.plan.asResource());
+    this.model.add(this.plan.getModel());
 
     // Performance: Date
     // TODO ask for end time (if any)
@@ -128,5 +133,9 @@ public class F31_Performance extends DoremusResource {
 
   public E52_TimeSpan getTimeSpan() {
     return timeSpan;
+  }
+
+  public Resource getPlan() {
+    return plan.asResource();
   }
 }
