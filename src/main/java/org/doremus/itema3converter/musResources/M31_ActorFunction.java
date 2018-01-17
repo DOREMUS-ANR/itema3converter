@@ -10,6 +10,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.doremus.itema3converter.ConstructURI;
+import org.doremus.ontology.CIDOC;
 import org.doremus.ontology.MUS;
 
 import java.io.File;
@@ -120,6 +121,7 @@ public class M31_ActorFunction extends DoremusResource {
       this.uri = ConstructURI.build(this.sourceDb, cName, this.getFunctionId() + appendix);
       this.resource = model.createResource(this.uri.toString())
         .addProperty(RDF.type, cClass)
+        .addProperty(CIDOC.P1_is_identified_by, this.label, "fr")
         .addProperty(RDFS.label, this.label, "fr");
 
     } catch (URISyntaxException e) {
