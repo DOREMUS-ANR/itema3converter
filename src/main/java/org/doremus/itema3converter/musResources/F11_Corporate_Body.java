@@ -21,7 +21,7 @@ public class F11_Corporate_Body extends DoremusResource {
   private String name;
   private String birthDate, deathDate;
 
-  public F11_Corporate_Body(Morale record) throws URISyntaxException, NullPointerException {
+  public F11_Corporate_Body(Morale record) throws NullPointerException {
     super(record.getId());
     this.record = record;
     this.name = fixCase(record.getName());

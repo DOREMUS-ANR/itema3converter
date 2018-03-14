@@ -158,9 +158,9 @@ public class M31_ActorFunction extends DoremusResource {
 
   public Property getDefaultProperty() {
     if (this.isAFunction())
-      return MUS.U31_had_function_of_type;
+      return MUS.U31_had_function;
     if (this.id == 19)
-      return MUS.U32_had_responsibility_of_type;
+      return MUS.U32_had_responsibility;
     return MUS.U1_used_medium_of_performance;
   }
 

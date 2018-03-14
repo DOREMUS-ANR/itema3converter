@@ -31,7 +31,7 @@ public class E7_Activity {
     return model.createResource(this.uri)
       .addProperty(RDF.type, CIDOC.E7_Activity)
       .addProperty(CIDOC.P14_carried_out_by, carrier.asResource())
-      .addProperty(MUS.U31_had_function_of_type, af.asResource());
+      .addProperty(MUS.U31_had_function, af.asResource());
   }
 
   public M31_ActorFunction getAf() {

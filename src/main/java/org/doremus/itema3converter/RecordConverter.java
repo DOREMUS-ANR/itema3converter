@@ -26,8 +26,6 @@ import java.util.logging.Logger;
 // Convert entirely an entire single ITEM of ITEMA3, from performance to track
 public class RecordConverter {
   public static Resource RadioFrance;
-  //    public static final DateFormat ISODateTimeFormat = new SimpleDateFormat("yyyy-MM-ddThh:mm:ss");
-//    public static final DateFormat ISOTimeFormat = new SimpleDateFormat("hh:mm:ss");
 
   private static Logger log = MyLogger.getLogger(RecordConverter.class.getName());
   private Resource provEntity, provActivity;

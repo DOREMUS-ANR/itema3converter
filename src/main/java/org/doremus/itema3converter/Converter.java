@@ -37,10 +37,10 @@ import java.util.regex.Pattern;
 
 public class Converter {
   static Logger log = MyLogger.getLogger(Converter.class.getName());
-  public static final String UTF8_BOM = "\uFEFF";
+  private static final String UTF8_BOM = "\uFEFF";
   public final static String SCHEMA = "http://schema.org/";
 
-  public static Properties properties;
+  private static Properties properties;
   static String dataFolderPath;
   private static String inputFolderPath, outputFolderPath;
 
@@ -158,7 +158,7 @@ public class Converter {
       writeTtl(m, Paths.get(outputFolder, p.getName().replaceFirst(".xml", ".ttl")).toString());
     } catch (NullPointerException e) {
       log.severe("Corporate without name: " + mr.getId());
-    } catch (URISyntaxException | IOException e) {
+    } catch (IOException e) {
       e.printStackTrace();
     }
   }

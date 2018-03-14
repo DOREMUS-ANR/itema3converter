@@ -44,7 +44,7 @@ public abstract class DoremusResource {
 
 
     this.resource = null;
-        /* create RDF resource */
+    /* create RDF resource */
     regenerateResource();
   }
 

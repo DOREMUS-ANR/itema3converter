@@ -59,7 +59,7 @@ public class F29_RecordingEvent extends DoremusResource {
       model.createResource(a_uri)
         .addProperty(RDF.type, CIDOC.E7_Activity)
         .addProperty(CIDOC.P14_carried_out_by, actor)
-        .addProperty(MUS.U31_had_function_of_type, function)
+        .addProperty(MUS.U31_had_function, function)
     );
 
   }

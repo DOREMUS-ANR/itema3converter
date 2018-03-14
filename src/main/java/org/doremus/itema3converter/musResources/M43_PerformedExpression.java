@@ -23,7 +23,7 @@ public class M43_PerformedExpression extends DoremusResource implements Comparab
 
     // Title
     title = omu.getTitle();
-    this.resource.addProperty(MUS.U70_has_title, omu.getTitle())
+    this.resource.addProperty(MUS.U70_has_original_title, omu.getTitle())
       .addProperty(RDFS.label, omu.getTitle());
 
     timecode = omu.timecode;
