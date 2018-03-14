@@ -50,17 +50,17 @@ public class Personne extends Itema3File {
 
     public String getName() {
         if(name.isEmpty()) return null;
-        return name;
+        return name.trim();
     }
 
     public String getSurname() {
         if (surname.isEmpty()) return null;
-        return surname;
+        return surname.trim();
     }
 
     public String getPseudonym() {
         if(pseudonym.isEmpty()) return null;
-        return pseudonym;
+        return pseudonym.trim();
     }
 
     public Date getBirthDate() {
