@@ -2,21 +2,23 @@ package org.doremus.itema3converter.musResources;
 
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
-import org.apache.jena.vocabulary.RDFS;
 import org.doremus.itema3converter.files.Omu;
 import org.doremus.itema3converter.files.OmuPersonne;
+import org.doremus.itema3converter.files.OmuTypeMusicalDoc;
 import org.doremus.ontology.CIDOC;
 import org.doremus.ontology.FRBROO;
-import org.doremus.ontology.MUS;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class F28_ExpressionCreation extends DoremusResource {
+
+  private E52_TimeSpan timeSpan;
 
   public F28_ExpressionCreation(Omu omu, boolean createAPerformancePlan) {
     super(omu, getId(omu.getId(), createAPerformancePlan));
@@ -36,8 +38,15 @@ public class F28_ExpressionCreation extends DoremusResource {
 
     // date of the work
     String date = omu.compositionDate.trim();
-    if (!date.isEmpty())
-      this.resource.addProperty(CIDOC.P4_has_time_span, toTimeSpan(date));
+    if (!date.isEmpty()) {
+      try {
+        this.timeSpan = toTimeSpan(date);
+        this.resource.addProperty(CIDOC.P4_has_time_span, timeSpan.asResource());
+        this.model.add(timeSpan.model);
+      } catch (URISyntaxException e) {
+        e.printStackTrace();
+      }
+    }
 
     // composer
     int ipCount = 0;
@@ -47,9 +56,16 @@ public class F28_ExpressionCreation extends DoremusResource {
       if (activity.getAf() != null && activity.getAf().isWorkAuthor())
         this.resource.addProperty(CIDOC.P9_consists_of, activity.asResource());
     }
+
+    // period
+    for (OmuTypeMusicalDoc ot : OmuTypeMusicalDoc.byOmu(omu.getId())) {
+      if (ot.isPeriod() && timeSpan.getStart().getLexicalForm().startsWith(ot.getPeriodCentury()))
+        this.resource.addProperty(CIDOC.P10_falls_within, model.createResource(ot.getUri()));
+    }
+
   }
 
-  private Resource toTimeSpan(String date) {
+  private E52_TimeSpan toTimeSpan(String date) throws URISyntaxException {
     String[] parts = date.split("-", 2);
     List<Literal> literals = new ArrayList<>();
 
@@ -69,16 +85,8 @@ public class F28_ExpressionCreation extends DoremusResource {
 
     Literal start = literals.get(0);
     Literal end = literals.get(literals.size() - 1);
-    String label = (start == end) ?
-      start.getLexicalForm() :
-      start.getLexicalForm() + "/" + end.getLexicalForm();
 
-
-    return model.createResource(this.uri + "/time")
-      .addProperty(RDF.type, CIDOC.E52_Time_Span)
-      .addProperty(RDFS.label, label)
-      .addProperty(CIDOC.P79_beginning_is_qualified_by, start)
-      .addProperty(CIDOC.P80_end_is_qualified_by, end);
+    return new E52_TimeSpan(new URI(this.uri + "/time"), start, end);
   }
 
   private void parsePerformancePlan() {
