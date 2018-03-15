@@ -28,9 +28,11 @@ public class MagSupport extends Itema3File {
     return id;
   }
 
-  public String getSampleRate() {
+  public Float getSampleRate() {
     MagFreqEchantillon mfe = MagFreqEchantillon.getMagFreqEchantillon(this.sampleRateId);
-    return mfe.getSampleRate();
+    String rate = mfe.getSampleRate();
+    if(rate.isEmpty()) return null;
+    return Float.parseFloat(rate);
   }
 
   public MagTypeSupport getType() {

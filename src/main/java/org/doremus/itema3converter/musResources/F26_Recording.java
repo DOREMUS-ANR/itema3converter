@@ -15,16 +15,12 @@ public class F26_Recording extends DoremusResource {
     this.resource.addProperty(RDF.type, FRBROO.F26_Recording);
 
     // Sampling rate
-    String sampl = MagSupport.byMag(mag.getId()).get(0).getSampleRate();
-    this.resource.addProperty(
-      CIDOC.P43_has_dimension,
-      model.createResource("http://data.doremus.org/rate/" + sampl)
-        .addProperty(RDF.type, CIDOC.E54_Dimension)
-        .addProperty(CIDOC.P2_has_type, model.createResource("http://dbpedia.org/resource/Sampling_rate"))
-        .addProperty(CIDOC.P90_has_value, sampl, XSDDatatype.XSDfloat)
-        .addProperty(CIDOC.P91_has_unit, model.createResource("http://dbpedia.org/datatype/kilohertz")
-        )
-    );
+    Float sampl = MagSupport.byMag(mag.getId()).get(0).getSampleRate();
+    if (sampl != null) {
+      Float hz = sampl * 1000;
+      this.resource.addProperty(
+        model.createProperty("http://dbpedia.org/ontology/frequency"), hz.toString(), XSDDatatype.XSDdouble);
+    }
 
     // Duration
     if (mag.getDuration() != null)
