@@ -1,5 +1,6 @@
 package org.doremus.itema3converter;
 
+import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -30,6 +31,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.Instant;
 import java.util.Properties;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -43,6 +45,7 @@ public class Converter {
   private static Properties properties;
   static String dataFolderPath;
   private static String inputFolderPath, outputFolderPath;
+  private static boolean modifiedOut = false;
 
   public static void main(String[] args) throws IOException, XMLStreamException, TransformerException {
     // INIT
@@ -214,10 +217,18 @@ public class Converter {
       String newFileName = mc.getName().replaceFirst(".xml", ".ttl");
 
       VocabularyManager.string2uri(m);
+      if(!modifiedOut) modifiedOut= addModified(m);
+
       writeTtl(m, Paths.get(outputFolder, newFileName).toString());
     } catch (IOException | URISyntaxException e) {
       e.printStackTrace();
     }
+  }
+
+  protected static boolean addModified(Model model) {
+    model.createResource("http://data.doremus.org/itema3")
+      .addProperty(DCTerms.modified, Instant.now().toString(), XSDDatatype.XSDdateTime);
+    return true;
   }
 
   private static void writeTtl(Model m, String filename) throws IOException {
