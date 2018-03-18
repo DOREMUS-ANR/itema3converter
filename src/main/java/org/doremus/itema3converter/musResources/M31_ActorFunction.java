@@ -22,7 +22,7 @@ import java.util.List;
 
 public class M31_ActorFunction extends DoremusResource {
   private List<Integer> MOP_TYPES = Arrays.asList(19, 204, 205, 230, 231, 235, 181, 248);
-  private List<Integer> MORALE_MOP_TYPES = Arrays.asList(1, 2, 304);
+  private List<Integer> MORALE_MOP_TYPES = Arrays.asList(1, 2, 301, 302, 303, 304);
 
   private static List<M31_ActorFunction> list = null;
 

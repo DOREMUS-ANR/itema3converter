@@ -18,7 +18,7 @@ import java.util.List;
 
 public class F28_ExpressionCreation extends DoremusResource {
 
-  private E52_TimeSpan timeSpan;
+  private E52_TimeSpan timeSpan = null;
 
   public F28_ExpressionCreation(Omu omu, boolean createAPerformancePlan) {
     super(omu, getId(omu.getId(), createAPerformancePlan));
@@ -59,7 +59,8 @@ public class F28_ExpressionCreation extends DoremusResource {
 
     // period
     for (OmuTypeMusicalDoc ot : OmuTypeMusicalDoc.byOmu(omu.getId())) {
-      if (ot.isPeriod() && timeSpan.getStart().getLexicalForm().startsWith(ot.getPeriodCentury()))
+      if (ot.isPeriod() && timeSpan != null &&
+        timeSpan.getStart().getLexicalForm().startsWith(ot.getPeriodCentury()))
         this.resource.addProperty(CIDOC.P10_falls_within, model.createResource(ot.getUri()));
     }
 

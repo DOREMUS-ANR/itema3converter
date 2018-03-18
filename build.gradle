@@ -29,7 +29,7 @@ dependencies {
             'org.geonames:geonames:1.0',
             'com.opencsv:opencsv:3.10',
             'com.moparisthebest:junidecode:0.1.1',
-            'com.github.DOREMUS-ANR:string2vocabulary:0.1'
+            'com.github.DOREMUS-ANR:string2vocabulary:0.2'
 }
 
 run {
