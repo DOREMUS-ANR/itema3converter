@@ -208,7 +208,7 @@ public class Converter {
   }
 
   private static void parseRecord(File mc, String outputFolder) {
-    if (!mc.getName().equals("3009929.xml")) return;
+//    if (!mc.getName().equals("3009929.xml")) return;
 
     try {
       RecordConverter r = new RecordConverter(mc);
