@@ -9,8 +9,6 @@ import org.doremus.ontology.CIDOC;
 import java.net.URI;
 
 public class E53_Place extends DoremusResource {
-  private static final String GEO_NAME = "http://www.geonames.org/ontology#name";
-
   public E53_Place(LieuGeo record) {
     super(record);
 
@@ -20,7 +18,7 @@ public class E53_Place extends DoremusResource {
 
     this.resource.addProperty(RDF.type, CIDOC.E53_Place)
       .addProperty(RDFS.label, label)
-      .addProperty(model.createProperty(GEO_NAME), label)
+      .addProperty(model.createProperty(GeoNames.NAME), label)
       .addProperty(CIDOC.P1_is_identified_by, record.getLabel())
       .addProperty(CIDOC.P89_falls_within, new E53_Place(record.getFatherId()).asResource());
 

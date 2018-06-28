@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Properties;
 
 public class GeoNames {
+  public static final String NAME = "http://www.geonames.org/ontology#name";
   static Map<String, Integer> cache; // cache idItema3 -> idGeoNames
   public static String destFolder;
 

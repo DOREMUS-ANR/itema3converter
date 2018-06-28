@@ -3,6 +3,7 @@ package org.doremus.itema3converter.musResources;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.RDFS;
 import org.doremus.itema3converter.ConstructURI;
@@ -15,15 +16,15 @@ import java.net.URISyntaxException;
 
 
 public abstract class DoremusResource {
-  protected String className;
-  protected final String sourceDb = "rfi"; // radio france itema3
+  String className;
+  final String sourceDb = "rfi"; // radio france itema3
   protected Itema3File record;
 
   protected Model model;
   protected URI uri;
   protected Resource resource;
-  protected String identifier;
-  protected Resource publisher;
+  private String identifier;
+  private Resource publisher;
 
   public DoremusResource() {
     // do nothing, enables customisation for child class
@@ -46,6 +47,13 @@ public abstract class DoremusResource {
     this.resource = null;
     /* create RDF resource */
     regenerateResource();
+  }
+
+  protected void setUri(String uri) throws URISyntaxException {
+    if (this.uri != null && uri.equals(this.uri.toString())) return;
+    this.uri = new URI(uri);
+    if (this.resource != null)
+      this.resource = ResourceUtils.renameResource(this.resource, uri);
   }
 
   protected void regenerateResource() {
@@ -92,5 +100,9 @@ public abstract class DoremusResource {
     this.resource
       .addProperty(RDFS.comment, text, "fr")
       .addProperty(CIDOC.P3_has_note, text, "fr");
+  }
+
+  public URI getUri() {
+    return uri;
   }
 }

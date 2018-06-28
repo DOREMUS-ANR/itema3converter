@@ -40,9 +40,8 @@ import java.util.regex.Pattern;
 public class Converter {
   static Logger log = MyLogger.getLogger(Converter.class.getName());
   private static final String UTF8_BOM = "\uFEFF";
-  public final static String SCHEMA = "http://schema.org/";
 
-  private static Properties properties;
+  static Properties properties;
   static String dataFolderPath;
   private static String inputFolderPath, outputFolderPath;
   private static boolean modifiedOut = false;
@@ -133,7 +132,7 @@ public class Converter {
     if (!force && ps.getStatus() != 1) return;
     try {
       E21_Person person = new E21_Person(ps);
-      log.info("Person : " + ps.getId() + " " + person.getFullName());
+//      log.info("Person : " + ps.getId() + " " + person.getFullName());
 
       writeTtl(person.getModel(), Paths.get(outputFolder, p.getName().replaceFirst(".xml", ".ttl")).toString());
     } catch (URISyntaxException | IOException e) {
@@ -208,7 +207,7 @@ public class Converter {
   }
 
   private static void parseRecord(File mc, String outputFolder) {
-//    if (!mc.getName().equals("3009929.xml")) return;
+//    if (!mc.getName().equals("1323968.xml")) return;
 
     try {
       RecordConverter r = new RecordConverter(mc);
@@ -244,7 +243,7 @@ public class Converter {
     m.setNsPrefix("rdfs", RDFS.getURI());
     m.setNsPrefix("prov", PROV.getURI());
     m.setNsPrefix("time", Time.getURI());
-    m.setNsPrefix("schema", SCHEMA);
+    m.setNsPrefix("schema", Schema.getURI());
 
 
     // Write the output file

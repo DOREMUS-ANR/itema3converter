@@ -8,12 +8,18 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.apache.jena.vocabulary.DCTerms;
+import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.doremus.isnimatcher.ISNIRecord;
 import org.doremus.itema3converter.ConstructURI;
 import org.doremus.itema3converter.Converter;
+import org.doremus.itema3converter.ISNIWrapper;
+import org.doremus.itema3converter.Utils;
 import org.doremus.itema3converter.files.Personne;
 import org.doremus.ontology.CIDOC;
+import org.doremus.ontology.PROV;
+import org.doremus.ontology.Schema;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -33,6 +39,23 @@ public class E21_Person extends DoremusResource {
   private Date birthDate, deathDate;
   private String birthYear, deathYear;
 
+
+  public E21_Person(String id) {
+    String uriCache = cache.get(id);
+    if (uriCache == null || uriCache.isEmpty()) {
+      Converter.parsePerson(id);
+      uriCache = cache.get(id);
+    }
+
+    try {
+      uri = new URI(uriCache);
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
+    }
+
+    this.resource = model.createResource(uri.toString());
+  }
+
   public E21_Person(Personne record) throws URISyntaxException {
     this.record = record;
     this.firstName = record.getName();
@@ -47,8 +70,10 @@ public class E21_Person extends DoremusResource {
     if (lastName == null || lastName.isEmpty()) ln = pseudo;
 
     this.uri = ConstructURI.build("E21_Person", firstName, ln, birthYear);
-    addToCache(record.getId(), this.uri.toString());
     initResource();
+    interlink();
+
+    addToCache(record.getId(), this.uri.toString());
   }
 
   private String fixCase(String str) {
@@ -59,13 +84,6 @@ public class E21_Person extends DoremusResource {
       .map(StringUtils::capitalize)
       .collect(Collectors.joining(" "));
   }
-
-  public E21_Person(String id) {
-    String uri = cache.get(id);
-    if (uri == null || uri.isEmpty()) Converter.parsePerson(id);
-    this.resource = model.createResource(uri);
-  }
-
 
   private String toYear(Date d, String s) {
     if (s != null && s.isEmpty())
@@ -121,20 +139,18 @@ public class E21_Person extends DoremusResource {
   }
 
   private void addDate(Literal date, boolean isDeath) throws URISyntaxException {
-    if(date == null) return;
+    if (date == null) return;
 
     String url = this.uri + (isDeath ? "/death" : "/birth");
 
     E52_TimeSpan ts = new E52_TimeSpan(new URI(url + "/interval"), date, date);
-    Property schemaProp = model.createProperty(Converter.SCHEMA + (isDeath ? "deathDate" : "birthDate"));
+    Property schemaProp = isDeath ? Schema.deathDate : Schema.birthDate;
 
     this.resource.addProperty(isDeath ? CIDOC.P100i_died_in : CIDOC.P98i_was_born,
       model.createResource(url)
         .addProperty(RDF.type, isDeath ? CIDOC.E69_Death : CIDOC.E67_Birth)
         .addProperty(CIDOC.P4_has_time_span, ts.asResource())
-    );
-
-    this.resource.addProperty(schemaProp, ts.getStart());
+    ).addProperty(schemaProp, ts.getStart());
     model.add(ts.getModel());
   }
 
@@ -156,6 +172,12 @@ public class E21_Person extends DoremusResource {
   public void addProperty(Property property, String object) {
     addProperty(property, object, null);
   }
+
+  public void addPropertyResource(Property property, String uri) {
+    if (property == null || uri == null) return;
+    resource.addProperty(property, model.createResource(uri));
+  }
+
 
   private Literal formatDate(Date d, String fallback) {
     String label;
@@ -204,7 +226,80 @@ public class E21_Person extends DoremusResource {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
 
+  private boolean interlink() throws URISyntaxException {
+    // 1. search in doremus by name/date
+    Resource match = getPersonFromDoremus();
+    if (match != null) {
+      this.setUri(match.getURI());
+      return true;
+    }
+
+    // 2. search in isni by name/date
+    ISNIRecord isniMatch;
+    try {
+      isniMatch = ISNIWrapper.search(this.getFullName(), this.birthYear);
+    } catch (IOException e) {
+      return false;
+    }
+    if (isniMatch == null) return false;
+
+    // 3. search in doremus by isni
+    match = getPersonFromDoremus(isniMatch.uri);
+    if (match != null) {
+      this.setUri(match.getURI());
+      return true;
+    }
+
+    // 4. add isni info
+    this.isniEnrich(isniMatch);
+    return false;
+  }
+
+  private Resource getPersonFromDoremus() {
+    String sparql =
+      "PREFIX ecrm: <" + CIDOC.getURI() + ">\n" +
+        "PREFIX foaf: <" + FOAF.getURI() + ">\n" +
+        "PREFIX prov: <" + PROV.getURI() + ">\n" +
+        "PREFIX schema: <" + Schema.getURI() + ">\n" +
+        "SELECT DISTINCT ?s " +
+        "FROM <http://data.doremus.org/bnf> " +
+        "WHERE { " +
+        "?s a ecrm:E21_Person; foaf:name \"" + this.getFullName() + "\"." +
+        (this.birthYear != null ? "?s schema:birthDate ?date. FILTER regex(str(?date), \"" + this.birthYear +
+          "\")\n" : "") +
+        "}";
+
+    return (Resource) Utils.queryDoremus(sparql, "s");
+  }
+
+  private Resource getPersonFromDoremus(String isni) {
+    String sparql =
+      "PREFIX owl: <" + OWL.getURI() + ">\n" +
+        "SELECT DISTINCT * WHERE {" +
+        " ?s owl:sameAs <" + isni + "> }";
+
+    return (Resource) Utils.queryDoremus(sparql, "s");
+  }
+
+
+  public void isniEnrich(ISNIRecord isni) {
+    this.addPropertyResource(OWL.sameAs, isni.uri);
+    this.addPropertyResource(OWL.sameAs, isni.getViafURI());
+    this.addPropertyResource(OWL.sameAs, isni.getMusicBrainzUri());
+    this.addPropertyResource(OWL.sameAs, isni.getMuziekwebURI());
+    this.addPropertyResource(OWL.sameAs, isni.getWikidataURI());
+
+    String wp = isni.getWikipediaUri();
+    String dp = isni.getDBpediaUri();
+
+    if (wp == null) {
+      wp = isni.getWikipediaUri("fr");
+      dp = isni.getDBpediaUri("fr");
+    }
+    this.addPropertyResource(OWL.sameAs, dp);
+    this.addPropertyResource(FOAF.isPrimaryTopicOf, wp);
   }
 
 }
