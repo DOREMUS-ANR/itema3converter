@@ -45,4 +45,8 @@ public class Utils {
   }
 
 
+  public static boolean startsLowerCase(String text) {
+    String first = text.substring(0, 1);
+    return first.matches("[a-z]");
+  }
 }

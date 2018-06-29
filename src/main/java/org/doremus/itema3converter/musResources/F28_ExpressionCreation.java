@@ -132,4 +132,13 @@ public class F28_ExpressionCreation extends DoremusResource {
     return composer;
   }
 
+  public F28_ExpressionCreation add(F14_IndividualWork f14) {
+    this.resource.addProperty(FRBROO.R19_created_a_realisation_of, f14.asResource());
+    return this;
+  }
+
+  public F28_ExpressionCreation add(F22_SelfContainedExpression f22) {
+    this.resource.addProperty(FRBROO.R17_created, f22.asResource());
+    return this;
+  }
 }

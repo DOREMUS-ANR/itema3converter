@@ -24,7 +24,7 @@ public abstract class DoremusResource {
   protected Model model;
   protected URI uri;
   protected Resource resource;
-  private String identifier;
+  protected String identifier;
 
   public DoremusResource() {
     // do nothing, enables customisation for child class
@@ -107,4 +107,5 @@ public abstract class DoremusResource {
   public URI getUri() {
     return uri;
   }
+
 }

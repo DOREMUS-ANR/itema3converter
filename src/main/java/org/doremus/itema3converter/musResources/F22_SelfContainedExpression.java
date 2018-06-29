@@ -2,6 +2,7 @@ package org.doremus.itema3converter.musResources;
 
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -32,23 +33,32 @@ public class F22_SelfContainedExpression extends DoremusResource {
   private static final Pattern keyRegex = Pattern.compile(" en ([^ ]+(?: (dièse|bémol))? (maj|min)(eur)?)",
     Pattern.CASE_INSENSITIVE);
   private static final Pattern engKeyRegex = Pattern.compile(" in (.+ (maj|min)(or)?)", Pattern.CASE_INSENSITIVE);
-  private Property MODSidProp;
 
-  public F22_SelfContainedExpression(Omu omu, List<String> composers) {
+  private static final Property MODSidProp = ResourceFactory.createProperty(MODS.uri, "identifier");
+
+
+  private String motherWorkTitle;
+  private boolean isMother;
+
+  public F22_SelfContainedExpression(Omu omu, List<String> composers, String title) {
     super(omu);
+    System.out.println(" op(?:us|[. ]) ?(?:posth )?(\\d+[a-z]*)" +
+      numRegexString + "?");
+    isMother = title != null;
+    if (isMother) {
+      this.identifier = "m" + omu.getId();
+      regenerateResource();
+    } else title = omu.getTitle();
 
-    MODSidProp = model.createProperty(MODS.uri, "identifier");
-    String title = omu.getTitle();
-
-    System.out.println("****");
     System.out.println(title);
+
     title = extractTokens(title, composers);
-    System.out.println(title);
 
     this.resource.addProperty(RDF.type, FRBROO.F22_Self_Contained_Expression)
       .addProperty(CIDOC.P102_has_title, title)
       .addProperty(RDFS.label, title);
 
+    if (!isMother) return;
 
     // genre
     for (OmuTypeMusicalDoc ot : OmuTypeMusicalDoc.byOmu(omu.getId())) {
@@ -77,10 +87,36 @@ public class F22_SelfContainedExpression extends DoremusResource {
     // note
     addNote(omu.workNote);
     addNote(omu.getNote(this.className));
+
   }
+
+
+  public F22_SelfContainedExpression(Omu omu, List<String> composers) {
+    this(omu, composers, null);
+  }
+
 
   private String extractTokens(String text, List<String> composers) {
     String originalTitle = text;
+
+    this.isMother = true;
+    // movement
+    String[] parts = originalTitle.split(": ", 2);
+    if (parts.length > 1 && Utils.areQuotesBalanced(parts)) {
+      // Trois mélodies : 1. La mer est plus belle que les cathédrales
+
+      String movement = parts[1].trim();
+      if (!movement.matches("\\d+")) {
+        originalTitle = parts[0].trim();
+
+        if (Utils.startsLowerCase(movement))
+          movement = originalTitle + " | " + movement;
+
+        setMotherWorkTitle(originalTitle);
+        originalTitle = movement;
+        this.isMother = false;
+      }
+    }
 
     // opus number
     Matcher opusMatch = opusRegex.matcher(text);
@@ -95,7 +131,6 @@ public class F22_SelfContainedExpression extends DoremusResource {
     text = text.replaceAll("op\\.? ?posth\\.?", "");
 
     // WoO number
-    System.out.println("woo (\\d[0-9a-z])*" + numRegexString + "?");
     Matcher wooMatch = wooPattern.matcher(text);
     if (wooMatch.find()) {
       String note = wooMatch.group(0);
@@ -211,7 +246,7 @@ public class F22_SelfContainedExpression extends DoremusResource {
     }
 
     // casting
-    String[] parts = text.split("pour ", 2);
+    parts = text.split("pour ", 2);
     if (parts.length > 1
       && !parts[1].startsWith(" précéder")
       && !parts[1].startsWith(" quatuor")
@@ -236,14 +271,6 @@ public class F22_SelfContainedExpression extends DoremusResource {
       }
     }
 
-    // movement
-    String movement = "";
-    parts = originalTitle.split(": ", 2);
-    if (parts.length > 1 && Utils.areQuotesBalanced(parts)) {
-      originalTitle = parts[0].trim();
-      movement = parts[1].trim();
-    }
-
     // subtitle
     //    String subtitle = "";
     //    parts = text.split(", ", 2);
@@ -255,10 +282,23 @@ public class F22_SelfContainedExpression extends DoremusResource {
 
     originalTitle = originalTitle
       .replaceAll(" +", " ") // remove double spaces
+      .replaceAll(" +,", ",") // compress space + comma
       .replaceAll(", ?$", "")  // remove last comma
       .trim();
 
     return originalTitle;
+  }
+
+  public void setMotherWorkTitle(String originalTitle) {
+    this.motherWorkTitle = originalTitle.trim();
+  }
+
+  public String getMotherWorkTitle() {
+    return this.motherWorkTitle;
+  }
+
+  public boolean foreseesMother() {
+    return this.motherWorkTitle != null;
   }
 
   private static String removeExtrait(String text) {

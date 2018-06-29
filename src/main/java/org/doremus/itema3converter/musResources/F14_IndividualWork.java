@@ -12,9 +12,18 @@ public class F14_IndividualWork extends DoremusResource {
   public F14_IndividualWork(Omu omu) {
     super(omu);
     this.resource.addProperty(RDF.type, FRBROO.F14_Individual_Work);
+    parseRecord();
+  }
 
+  public F14_IndividualWork(Omu omu, String identifier) {
+    super(omu, identifier);
+    this.resource.addProperty(RDF.type, FRBROO.F14_Individual_Work);
+    parseRecord();
+  }
+
+  private void parseRecord(){
     // derivation type
-    OmuTypeMusicalDoc.byOmu(omu.getId())
+    OmuTypeMusicalDoc.byOmu(this.record.getId())
       .stream()
       .filter(OmuTypeMusicalDoc::isDerivation)
       .forEach(ot -> this.resource.addProperty(MUS.U47_has_derivation_type, ot.getLabel()));
@@ -22,5 +31,15 @@ public class F14_IndividualWork extends DoremusResource {
 
   public void setDerivation(String derivation) {
     this.resource.addProperty(MUS.U47_has_derivation_type, derivation);
+  }
+
+  public F14_IndividualWork add(F22_SelfContainedExpression f22) {
+    this.resource.addProperty(FRBROO.R9_is_realised_in, f22.asResource());
+    return this;
+  }
+
+  public F14_IndividualWork add(F14_IndividualWork child) {
+    this.resource.addProperty(CIDOC.P148_has_component, child.asResource());
+    return this;
   }
 }

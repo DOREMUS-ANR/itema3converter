@@ -109,12 +109,18 @@ public class RecordConverter {
       F22_SelfContainedExpression f22 = new F22_SelfContainedExpression(omu, f28.getComposers());
       if (f28.getDerivation() != null) f14.setDerivation(f28.getDerivation());
 
+      if (f22.foreseesMother()) {
+        F14_IndividualWork f14m = new F14_IndividualWork(omu, "m" + omu.getId());
+        F22_SelfContainedExpression f22m = new F22_SelfContainedExpression(omu, f28.getComposers(), f22.getMotherWorkTitle());
+        f14m.add(f22m);
+        f14m.add(f14);
+        f28.add(f14m).add(f22m);
+        model.add(f22m.getModel()).add(f14m.getModel());
+      }
+
       pp.add(f22);
-      f14.asResource()
-        .addProperty(FRBROO.R9_is_realised_in, f22.asResource());
-      f28.asResource()
-        .addProperty(FRBROO.R19_created_a_realisation_of, f14.asResource())
-        .addProperty(FRBROO.R17_created, f22.asResource());
+      f14.add(f22);
+      f28.add(f14).add(f22);
       pe.asResource()
         .addProperty(MUS.U54_is_performed_expression_of, f22.asResource());
       f31.asResource()
