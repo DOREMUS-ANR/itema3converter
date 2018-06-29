@@ -4,3 +4,5 @@ http://data.doremus.org/ontology#U11_has_key,key
 http://data.doremus.org/ontology#U12_has_genre,genre
 http://data.doremus.org/ontology#U31_had_function,function
 http://data.doremus.org/ontology#U35_foresees_function,function
+http://data.doremus.org/ontology#U47_has_derivation_type,derivation
+http://data.doremus.org/ontology#U227_has_content_type,RDAContentType

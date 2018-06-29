@@ -13,7 +13,8 @@ public class M24_Track extends DoremusResource {
 
   public M24_Track(Sequence sequence, int order) {
     super(sequence);
-    this.resource.addProperty(RDF.type, MUS.M24_Track);
+    this.resource.addProperty(RDF.type, MUS.M24_Track)
+      .addProperty(MUS.U227_has_content_type, "performed music", "en");
 
     // label
     title = sequence.label;

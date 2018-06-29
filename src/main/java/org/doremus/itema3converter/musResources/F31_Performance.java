@@ -1,6 +1,5 @@
 package org.doremus.itema3converter.musResources;
 
-import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.doremus.itema3converter.files.Invite;
@@ -64,12 +63,9 @@ public class F31_Performance extends DoremusResource {
 //    System.out.println(item.getLabel());
 
 
-
-
     // Performance: comment
-    for (String s : new String[]{item.getDescription(), item.getAnalyseDoc()}) {
-      if (!"?".equals(s)) addNote(s);
-    }
+    if (!"?".equals(item.getDescription()))
+      addNote(item.getDescription());
 
     // Performance: invited
     int invI = 0;
@@ -99,7 +95,7 @@ public class F31_Performance extends DoremusResource {
     return timeSpan;
   }
 
-  public Resource getPlan() {
-    return plan.asResource();
+  public F25_PerformancePlan getPlan() {
+    return plan;
   }
 }

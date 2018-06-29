@@ -56,7 +56,7 @@ public class E21_Person extends DoremusResource {
     this.resource = model.createResource(uri.toString());
   }
 
-  public E21_Person(Personne record) throws URISyntaxException {
+  public E21_Person(Personne record) throws URISyntaxException, RuntimeException {
     this.record = record;
     this.firstName = record.getName();
     this.lastName = fixCase(record.getSurname());
@@ -68,6 +68,7 @@ public class E21_Person extends DoremusResource {
 
     String ln = lastName;
     if (lastName == null || lastName.isEmpty()) ln = pseudo;
+    if (ln.isEmpty() ) throw new RuntimeException("Person without surname neither pseudo :"+ record.getId());
 
     this.uri = ConstructURI.build("E21_Person", firstName, ln, birthYear);
     initResource();

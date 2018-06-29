@@ -19,7 +19,7 @@ public class ItemIdxGeo extends Itema3File {
     @XmlElement(name = "LIEU_GEO_ID")
     private String lieuGeoId;
 
-    @Override
+  @Override
     public String getId() {
         return id;
     }

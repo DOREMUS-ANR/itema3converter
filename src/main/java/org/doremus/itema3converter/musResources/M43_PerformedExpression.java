@@ -14,7 +14,8 @@ public class M43_PerformedExpression extends DoremusResource implements Comparab
 
   public M43_PerformedExpression(Omu omu) {
     super(omu);
-    this.resource.addProperty(RDF.type, MUS.M43_Performed_Expression);
+    this.resource.addProperty(RDF.type, MUS.M43_Performed_Expression)
+      .addProperty(MUS.U227_has_content_type, "performed music", "en");
 
     // Duration
     Duration duration = Duration.ofMillis(omu.durationMillis);

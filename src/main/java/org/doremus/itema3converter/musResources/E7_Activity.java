@@ -10,12 +10,13 @@ import org.doremus.ontology.MUS;
 public class E7_Activity {
   private final Model model;
   private final String uri;
-  private final DoremusResource carrier;
+  private DoremusResource carrier;
+  private Resource carrierResource;
 
   private final M31_ActorFunction af;
 
-  public E7_Activity(String uri, OmuPersonne op, Model m) {
-    this.model = m;
+  public E7_Activity(String uri, OmuPersonne op, Model model) {
+    this.model = model;
     this.uri = uri;
 
     af = op.professionID > 0 ?
@@ -26,11 +27,21 @@ public class E7_Activity {
       new F11_Corporate_Body(op.moraleID) : new E21_Person(op.personneID);
   }
 
+  public E7_Activity(String uri, Resource actor, String function, Model model) {
+    this.model = model;
+    this.uri = uri;
+
+    this.af = new M31_ActorFunction(function);
+    this.carrierResource = actor;
+  }
+
   public Resource asResource() {
+    Resource cr = carrier == null ? carrierResource : carrier.asResource();
+
     model.add(af.getModel());
     return model.createResource(this.uri)
       .addProperty(RDF.type, CIDOC.E7_Activity)
-      .addProperty(CIDOC.P14_carried_out_by, carrier.asResource())
+      .addProperty(CIDOC.P14_carried_out_by, cr)
       .addProperty(MUS.U31_had_function, af.asResource());
   }
 
@@ -38,5 +49,7 @@ public class E7_Activity {
     return af;
   }
 
-
+  public DoremusResource getCarrier() {
+    return carrier;
+  }
 }

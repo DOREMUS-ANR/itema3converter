@@ -69,8 +69,8 @@ public class E52_TimeSpan extends DoremusResource {
     this.start = start;
     this.end = end;
 
-    String label = start.toString();
-    if (end != null && !end.equals(start)) label += "/" + end.toString();
+    String label = start.getLexicalForm();
+    if (end != null && !end.equals(start)) label += "/" + end.getLexicalForm();
 
     this.resource = model.createResource(uri.toString())
       .addProperty(RDF.type, CIDOC.E52_Time_Span)

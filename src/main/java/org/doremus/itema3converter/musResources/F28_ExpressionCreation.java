@@ -2,12 +2,16 @@ package org.doremus.itema3converter.musResources;
 
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
+import org.doremus.itema3converter.Converter;
 import org.doremus.itema3converter.files.Omu;
 import org.doremus.itema3converter.files.OmuPersonne;
 import org.doremus.itema3converter.files.OmuTypeMusicalDoc;
 import org.doremus.ontology.CIDOC;
 import org.doremus.ontology.FRBROO;
+import org.doremus.ontology.MUS;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,6 +23,8 @@ import java.util.List;
 public class F28_ExpressionCreation extends DoremusResource {
 
   private E52_TimeSpan timeSpan = null;
+  private List<String> composer;
+  private String derivation;
 
   public F28_ExpressionCreation(Omu omu, boolean createAPerformancePlan) {
     super(omu, getId(omu.getId(), createAPerformancePlan));
@@ -35,6 +41,7 @@ public class F28_ExpressionCreation extends DoremusResource {
 
   private void parseWork() {
     Omu omu = (Omu) this.record;
+    this.composer = new ArrayList<>();
 
     // date of the work
     String date = omu.compositionDate.trim();
@@ -53,8 +60,15 @@ public class F28_ExpressionCreation extends DoremusResource {
     for (OmuPersonne op : OmuPersonne.byOmu(omu.getId())) {
       String activityUri = this.uri + "/activity/" + ++ipCount;
       E7_Activity activity = new E7_Activity(activityUri, op, model);
-      if (activity.getAf() != null && activity.getAf().isWorkAuthor())
+
+      M31_ActorFunction af = activity.getAf();
+      if (af == null) continue;
+      if (af.getDerivation() != null && !af.getDerivation().isEmpty())
+        this.derivation = af.getDerivation();
+      if (af.isWorkAuthor())
         this.resource.addProperty(CIDOC.P9_consists_of, activity.asResource());
+      if (af.isComposer())
+        this.composer.add(activity.getCarrier().getUri().toString());
     }
 
     // period
@@ -64,6 +78,18 @@ public class F28_ExpressionCreation extends DoremusResource {
         this.resource.addProperty(CIDOC.P10_falls_within, model.createResource(ot.getUri()));
     }
 
+    // sponsor radio france
+    for (OmuTypeMusicalDoc ot : OmuTypeMusicalDoc.byOmu(omu.getId())) {
+      if (ot.hasCode("19")) {
+        String activityUri = this.uri + "/activity/" + ++ipCount;
+        E7_Activity activity = new E7_Activity(activityUri, Converter.RADIO_FRANCE, "commanditaire", model);
+        this.resource.addProperty(CIDOC.P9_consists_of, activity.asResource());
+      }
+    }
+  }
+
+  public String getDerivation() {
+    return derivation;
   }
 
   private E52_TimeSpan toTimeSpan(String date) throws URISyntaxException {
@@ -100,6 +126,10 @@ public class F28_ExpressionCreation extends DoremusResource {
         this.resource.addProperty(CIDOC.P9_consists_of, activity.asResource());
     }
 
+  }
+
+  public List<String> getComposers() {
+    return composer;
   }
 
 }

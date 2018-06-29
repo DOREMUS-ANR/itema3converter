@@ -8,7 +8,8 @@ import org.doremus.ontology.MUS;
 public class M46_Set_of_Tracks extends DoremusResource {
   public M46_Set_of_Tracks(MagContenu mag) {
     super(mag);
-    this.resource.addProperty(RDF.type, MUS.M46_Set_of_Tracks);
+    this.resource.addProperty(RDF.type, MUS.M46_Set_of_Tracks)
+      .addProperty(MUS.U227_has_content_type, "performed music", "en");
 
     // Duration
     if (mag.getDuration() != null)

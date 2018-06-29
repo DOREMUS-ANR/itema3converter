@@ -25,8 +25,6 @@ import java.util.logging.Logger;
 
 // Convert entirely an entire single ITEM of ITEMA3, from performance to track
 public class RecordConverter {
-  public static Resource RadioFrance;
-
   private static Logger log = MyLogger.getLogger(RecordConverter.class.getName());
   private Resource provEntity, provActivity;
 
@@ -37,7 +35,6 @@ public class RecordConverter {
     log.setLevel(Level.WARNING);
 
     model = ModelFactory.createDefaultModel();
-    RadioFrance = model.createResource("http://data.doremus.org/organization/Radio_France");
 
     MagContenu mag = MagContenu.fromFile(mc);
 
@@ -54,7 +51,7 @@ public class RecordConverter {
 
     // PROV-O tracing
     provEntity = model.createResource("http://data.doremus.org/source/itema3/" + mag.getItemId())
-      .addProperty(RDF.type, PROV.Entity).addProperty(PROV.wasAttributedTo, RadioFrance);
+      .addProperty(RDF.type, PROV.Entity).addProperty(PROV.wasAttributedTo, Converter.RADIO_FRANCE);
 
     provActivity = model.createResource(ConstructURI.build("rf", "prov", mag.getId()).toString())
       .addProperty(RDF.type, PROV.Activity).addProperty(RDF.type, PROV.Derivation)
@@ -90,26 +87,28 @@ public class RecordConverter {
       f31.asResource()
         .addProperty(CIDOC.P9_consists_of, pec.asResource())
         .addProperty(FRBROO.R25_performed, pp.asResource());
-      f31.getPlan().addProperty(FRBROO.R5_has_component, pp.asResource());
+      f31.getPlan().add(pp);
       pec.asResource()
         .addProperty(CIDOC.P9i_forms_part_of, f31.asResource())
         .addProperty(FRBROO.R19_created_a_realisation_of, pw.asResource())
-        .addProperty(FRBROO.R17_created, pe.asResource());
+        .addProperty(FRBROO.R17_created, pe.asResource())
+        .addProperty(FRBROO.R25_performed, pp.asResource());
       pw.asResource()
         .addProperty(FRBROO.R9_is_realised_in, pe.asResource());
       ppc.asResource()
         .addProperty(FRBROO.R19_created_a_realisation_of, ppw.asResource())
         .addProperty(FRBROO.R17_created, pp.asResource());
-      ppw.asResource()
-        .addProperty(FRBROO.R9_is_realised_in, pp.asResource());
+      ppw.add(pp);
 
       peList.add(pe);
 
       // The work performed
       F14_IndividualWork f14 = new F14_IndividualWork(omu);
       F28_ExpressionCreation f28 = new F28_ExpressionCreation(omu, false);
-      F22_SelfContainedExpression f22 = new F22_SelfContainedExpression(omu);
+      F22_SelfContainedExpression f22 = new F22_SelfContainedExpression(omu, f28.getComposers());
+      if (f28.getDerivation() != null) f14.setDerivation(f28.getDerivation());
 
+      pp.add(f22);
       f14.asResource()
         .addProperty(FRBROO.R9_is_realised_in, f22.asResource());
       f28.asResource()
@@ -126,7 +125,6 @@ public class RecordConverter {
         f14.asResource()
           .addProperty(MUS.U5_had_premiere, f31.asResource());
       }
-
       f22List.add(f22);
 
       model.add(pp.getModel());
@@ -180,7 +178,7 @@ public class RecordConverter {
 
       ms.asResource()
         .addProperty(CIDOC.P128_carries, rc.asResource())
-        .addProperty(CIDOC.P165_incorporates, set.asResource());
+        .addProperty(CIDOC.P128_carries, set.asResource());
 
       for (F22_SelfContainedExpression exp : f22List)
         ms.asResource().addProperty(CIDOC.P128_carries, exp.asResource());

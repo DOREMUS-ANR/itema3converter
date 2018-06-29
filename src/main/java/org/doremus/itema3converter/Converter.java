@@ -4,6 +4,7 @@ import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.apache.jena.vocabulary.*;
 import org.doremus.itema3converter.files.LieuGeo;
@@ -40,6 +41,8 @@ import java.util.regex.Pattern;
 public class Converter {
   static Logger log = MyLogger.getLogger(Converter.class.getName());
   private static final String UTF8_BOM = "\uFEFF";
+  public static Resource RADIO_FRANCE = ResourceFactory.createResource("http://data.doremus.org/organization/Radio_France");
+
 
   static Properties properties;
   static String dataFolderPath;
@@ -135,7 +138,7 @@ public class Converter {
 //      log.info("Person : " + ps.getId() + " " + person.getFullName());
 
       writeTtl(person.getModel(), Paths.get(outputFolder, p.getName().replaceFirst(".xml", ".ttl")).toString());
-    } catch (URISyntaxException | IOException e) {
+    } catch (URISyntaxException | IOException | RuntimeException e) {
       e.printStackTrace();
     }
   }

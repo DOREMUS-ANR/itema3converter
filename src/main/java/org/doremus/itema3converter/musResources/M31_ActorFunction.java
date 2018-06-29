@@ -30,7 +30,7 @@ public class M31_ActorFunction extends DoremusResource {
   private int id;
   @CsvBindByName(column = "TYPE_MORALE_ID")
   public int typeMoraleID;
-  @CsvBindByName(column = "LIB", required = true)
+  @CsvBindByName(column = "Correspondance", required = true)
   private String label;
   @CsvBindByName(column = "CU")
   private String functionID;
@@ -52,10 +52,25 @@ public class M31_ActorFunction extends DoremusResource {
   private boolean isARecordingRole;
   @CsvCustomBindByName(column = "F28 Nouvelle expression", converter = ConvertGermanToBoolean.class)
   private boolean isAnOtherArtisticRole;
+  @CsvBindByName(column = "M9 Derivation Type")
+  private String derivation;
 
 
   public M31_ActorFunction() {
     this.resource = null;
+  }
+
+  public M31_ActorFunction(String label){
+    try {
+      this.uri = ConstructURI.build(this.sourceDb, this.className, label);
+      this.label = label;
+      this.resource = model.createResource(this.uri.toString())
+        .addProperty(RDF.type, MUS.M31_Actor_Function)
+        .addProperty(CIDOC.P1_is_identified_by, this.label, "fr")
+        .addProperty(RDFS.label, this.label, "fr");
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
+    }
   }
 
   private static void init() {
@@ -155,6 +170,13 @@ public class M31_ActorFunction extends DoremusResource {
     return isAuthorMusic || isAuthorText || (typeMoraleID > 0 && isAuthor);
   }
 
+  public boolean isComposer() {
+    return isAuthorMusic;
+  }
+
+  public boolean isAnOtherArtisticRole() {
+    return isAnOtherArtisticRole;
+  }
 
   public Property getDefaultProperty() {
     if (this.isAFunction())
@@ -164,6 +186,9 @@ public class M31_ActorFunction extends DoremusResource {
     return MUS.U1_used_medium_of_performance;
   }
 
+  public String getDerivation() {
+    return derivation;
+  }
 }
 
 

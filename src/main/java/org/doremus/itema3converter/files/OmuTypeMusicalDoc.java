@@ -15,15 +15,16 @@ import java.util.List;
 @SuppressWarnings("unused")
 @XmlRootElement(name = "DATA_RECORD")
 public class OmuTypeMusicalDoc extends Itema3File {
-  private static final List<String> PERIODS = Arrays.asList("82,83,84,85,86,61,62".split(","));
   private final static String GENRE_NAMESPACE = "http://data.doremus.org/vocabulary/itema3/genre/musdoc/";
   private final static String PERIOD_NAMESPACE = "http://data.doremus.org/period/";
+
+  private static final List<String> DERIVATIONS = Arrays.asList("2,4,124".split(","));
+  private static final List<String> PERFORMANCE_MODES = Arrays.asList("1,36,99".split(","));
 
   @XmlElement(name = "OMU_ID")
   public String id;
   @XmlElement(name = "TYPE_MUSICAL_DOC_ID")
   private String musicalType;
-
 
   @Override
   public String getId() {
@@ -35,27 +36,57 @@ public class OmuTypeMusicalDoc extends Itema3File {
     return musicalType.trim();
   }
 
+  public boolean hasCode(String code) {
+    return code.equals(getMusicalType());
+  }
+
+  public String getType() {
+    return TypeMusicalDoc.get(id).getType();
+  }
+
+  public String getLabel() {
+    return TypeMusicalDoc.get(id).getLabel().toLowerCase();
+  }
+
+  public boolean isDerivation() {
+    return DERIVATIONS.contains(this.getMusicalType());
+  }
+
+  public boolean isPerformanceMode() {
+    return PERFORMANCE_MODES.contains(this.getMusicalType());
+  }
+
   public boolean isPeriod() {
-    return PERIODS.contains(this.getMusicalType());
+    return TypeMusicalDoc.get(id).isPeriod();
+  }
+
+  public boolean isGeoContext() {
+    return TypeMusicalDoc.get(id).isGeoContext();
   }
 
   public String getPeriodCentury() {
     if (this.getMusicalType() == null) return null;
-    switch (this.getMusicalType()) {
+    String period = getPeriod(this.getMusicalType());
+    if (period == null) return null;
+    return period.substring(0, 2);
+  }
+
+  private static String getPeriod(String code) {
+    switch (code) {
       case "84":
-        return "16";
+        return "16_century";
       case "82":
-        return "17";
+        return "17_century";
       case "83":
-        return "18";
+        return "18_century";
       case "85":
-        return "19";
+        return "19_century";
       case "86":
-        return "20";
+        return "20_century_1";
       case "61":
-        return "20";
+        return "20_century_2";
       case "62":
-        return "21";
+        return "21_century";
       default:
         return null;
     }
@@ -87,24 +118,4 @@ public class OmuTypeMusicalDoc extends Itema3File {
     return list;
   }
 
-  private static String getPeriod(String code) {
-    switch (code) {
-      case "84":
-        return "16_century";
-      case "82":
-        return "17_century";
-      case "83":
-        return "18_century";
-      case "85":
-        return "19_century";
-      case "86":
-        return "20_century_1";
-      case "61":
-        return "20_century_2";
-      case "62":
-        return "21_century";
-      default:
-        return null;
-    }
-  }
 }
