@@ -1,7 +1,12 @@
 package org.doremus.itema3converter;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.query.*;
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.ResourceFactory;
+
+import java.util.Arrays;
 
 public class Utils {
 
@@ -26,5 +31,18 @@ public class Utils {
     if (result == null) return null;
     else return result.get(var);
   }
+
+  public static Literal toSafeNumLiteral(String str) {
+    if (str.matches("\\d+"))
+      return ResourceFactory.createTypedLiteral(Integer.parseInt(str));
+    else return ResourceFactory.createTypedLiteral(str);
+  }
+
+  public static boolean areQuotesBalanced(String[] parts) {
+    return Arrays.stream(parts)
+      .noneMatch(p -> (StringUtils.countMatches(p, "\"") % 2) != 0 ||
+        (StringUtils.countMatches(p, "(") % 2) != (StringUtils.countMatches(p, "(") % 2));
+  }
+
 
 }

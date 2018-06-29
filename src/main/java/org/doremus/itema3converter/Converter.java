@@ -84,34 +84,30 @@ public class Converter {
 
     if (properties.getProperty("places").equals("true")) {
       GeoNames.setUser(properties.getProperty("geonames_user"));
-      String geonamesFolder = Paths.get(outputFolderPath, "place", "geonames").toString();
+      String geonamesFolder = Paths.get(properties.getProperty("placeFolder"), "geonames").toString();
       new File(geonamesFolder).mkdirs();
       GeoNames.setDestFolder(geonamesFolder);
 
       File plFolder = new File(Paths.get(dataFolderPath, "LIEU_GEO").toString());
 
       new File(outputFolderPath + "/place/p").mkdirs();
-      for (File p : plFolder.listFiles()) {
+      for (File p : plFolder.listFiles())
         parsePlace(p, outputFolderPath + "/place/p");
-      }
     }
 
     if (properties.getProperty("persons").equals("true")) {
       File persFolder = new File(Paths.get(dataFolderPath, "PERSONNE").toString());
       new File(outputFolderPath + "/person").mkdirs();
-      for (File p : persFolder.listFiles()) {
+      for (File p : persFolder.listFiles())
         parsePerson(p, outputFolderPath + "/person");
-      }
 
     }
 
     if (properties.getProperty("organizations").equals("true")) {
       File organizFolder = new File(Paths.get(dataFolderPath, "MORALE").toString());
       new File(outputFolderPath + "/organization").mkdirs();
-      for (File p : organizFolder.listFiles()) {
+      for (File p : organizFolder.listFiles())
         parseOrganization(p, outputFolderPath + "/organization");
-      }
-
     }
 
     // MAG_CONTENU is the first folder to parse
@@ -221,7 +217,7 @@ public class Converter {
       String newFileName = mc.getName().replaceFirst(".xml", ".ttl");
 
       VocabularyManager.string2uri(m);
-      if(!modifiedOut) modifiedOut= addModified(m);
+      if (!modifiedOut) modifiedOut = addModified(m);
 
       writeTtl(m, Paths.get(outputFolder, newFileName).toString());
     } catch (IOException | URISyntaxException e) {

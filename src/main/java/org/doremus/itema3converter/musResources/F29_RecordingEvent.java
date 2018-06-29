@@ -3,6 +3,7 @@ package org.doremus.itema3converter.musResources;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.doremus.itema3converter.Converter;
 import org.doremus.itema3converter.RecordConverter;
 import org.doremus.itema3converter.files.*;
 import org.doremus.ontology.CIDOC;
@@ -24,7 +25,7 @@ public class F29_RecordingEvent extends DoremusResource {
     if (!emissions.isEmpty()) {
       Emission emission = emissions.get(0).getEmission();
       if (emission != null && emission.num != 1107)
-        addActivity(RecordConverter.RadioFrance, "Enregistrement");
+        addActivity(Converter.RADIO_FRANCE, "Enregistrement");
     }
 
     // Activities

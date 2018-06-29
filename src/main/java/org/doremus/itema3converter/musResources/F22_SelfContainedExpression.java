@@ -1,11 +1,11 @@
 package org.doremus.itema3converter.musResources;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.doremus.itema3converter.Utils;
 import org.doremus.itema3converter.files.Omu;
 import org.doremus.itema3converter.files.OmuTypeMusicalDoc;
 import org.doremus.ontology.CIDOC;
@@ -14,7 +14,8 @@ import org.doremus.ontology.MUS;
 import org.doremus.string2vocabulary.MODS;
 import org.doremus.string2vocabulary.VocabularyManager;
 
-import java.util.Arrays;
+import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,11 +37,16 @@ public class F22_SelfContainedExpression extends DoremusResource {
 
     MODSidProp = model.createProperty(MODS.uri, "identifier");
     String title = omu.getTitle();
+
+    System.out.println("****");
+    System.out.println(title);
+    title = extractTokens(title, composers);
+    System.out.println(title);
+
     this.resource.addProperty(RDF.type, FRBROO.F22_Self_Contained_Expression)
       .addProperty(CIDOC.P102_has_title, title)
       .addProperty(RDFS.label, title);
 
-//    title = extractTokens(title, composers);
 
     // genre
     for (OmuTypeMusicalDoc ot : OmuTypeMusicalDoc.byOmu(omu.getId())) {
@@ -71,34 +77,33 @@ public class F22_SelfContainedExpression extends DoremusResource {
     addNote(omu.getNote(this.className));
   }
 
-  private String extractTokens(String title, List<String> composers) {
-//    if(!"Sonate en trio en ré mineur op 1 n°12 RV 63 P 1 n°12".equals(title)) return "";
-
-    String origTitle = title;
+  private String extractTokens(String text, List<String> composers) {
+    String originalTitle = text;
 
     // opus number
-    String opus = "", opusSub = "";
-    Matcher opusMatch = opusRegex.matcher(title);
+    Matcher opusMatch = opusRegex.matcher(text);
     if (opusMatch.find()) {
-      opus = opusMatch.group(1);
-      opusSub = opusMatch.group(2);
-      title = title.replace(opusMatch.group(0), "");
+      String note = opusMatch.group(0);
+      String opus = opusMatch.group(1);
+      String opusSub = opusMatch.group(2);
+
+      addOpus(note, opus, opusSub);
+      text = text.replace(note, "");
     }
-    title = title.replaceAll("op\\.? ?posth\\.?", "");
+    text = text.replaceAll("op\\.? ?posth\\.?", "");
 
     // WoO number
-    String woo = "", subWoo = "";
     Pattern wooPattern = Pattern.compile("woo (\\d[0-9a-z])*" + numRegexString + "?", Pattern.CASE_INSENSITIVE);
-    Matcher wooMatch = wooPattern.matcher(title);
+    Matcher wooMatch = wooPattern.matcher(text);
     if (wooMatch.find()) {
-      woo = wooMatch.group(1);
-      subWoo = wooMatch.group(2);
-      title = title.replace(wooMatch.group(0), "");
+      String note = opusMatch.group(0);
+      String woo = wooMatch.group(1);
+      String subWoo = wooMatch.group(2);
+      addOpus(note, woo, subWoo);
+      text = text.replace(note, "");
     }
 
-
     // catalogs
-    String catLabel = "", catNum = "";
     for (String u : composers) {
       for (Resource res : VocabularyManager.getMODS("catalogue").bySubject(u)) {
         StmtIterator it = res.listProperties(MODSidProp);
@@ -106,11 +111,12 @@ public class F22_SelfContainedExpression extends DoremusResource {
           String code = it.nextStatement().getString();
           Pattern catPattern = Pattern.compile(" " + code + "[ .] ?(\\d[0-9a-z]*)" + numRegexString + "?",
             Pattern.CASE_INSENSITIVE);
-          Matcher catMatch = catPattern.matcher(title);
+          Matcher catMatch = catPattern.matcher(text);
           if (catMatch.find()) {
-            catLabel = code;
-            catNum = catMatch.group(1).trim();
-            title = title.replace(catMatch.group(0), "");
+            String note = catMatch.group(0);
+            String catNum = catMatch.group(1).trim();
+            addCatalogue(note, code, catNum, u);
+            text = text.replace(note, "");
             break;
           }
         }
@@ -119,96 +125,192 @@ public class F22_SelfContainedExpression extends DoremusResource {
 
     // order number
     String orderNum = "";
-    Matcher livreMatcher = livreRegex.matcher(title);
+    Matcher livreMatcher = livreRegex.matcher(text);
     if (livreMatcher.find()) {
       orderNum = livreMatcher.group(0);
-      title = title.replace(livreMatcher.group(0), "");
+      if (text.contains("Livre I et II"))
+        orderNum = "Livre I et II";
+      text = text.replace(orderNum, "");
     }
-    Matcher orderNumMatch = orderNumRegex.matcher(title);
+    Matcher orderNumMatch = orderNumRegex.matcher(text);
     if (orderNumMatch.find()) {
       orderNum = orderNumMatch.group(1);
-      title = title.replace(orderNumMatch.group(0), "");
+      text = text.replace(orderNumMatch.group(0), "");
     }
+    if (!orderNum.isEmpty())
+      this.resource.addProperty(MUS.U10_has_order_number, Utils.toSafeNumLiteral(orderNum));
+
 
     // key
     String key = "";
-    Matcher keyMatch = keyRegex.matcher(title);
+    Matcher keyMatch = keyRegex.matcher(text);
     if (keyMatch.find()) {
       key = keyMatch.group(1).toLowerCase()
         .replaceAll("maj$", "majeur")
         .replaceAll("min$", "mineur");
-      title = title.replace(keyMatch.group(0), "");
+      text = text.replace(keyMatch.group(0), "");
     } else {
-      keyMatch = engKeyRegex.matcher(title);
+      keyMatch = engKeyRegex.matcher(text);
       if (keyMatch.find()) {
         key = keyMatch.group(1).replace('-', ' ');
-        title = title.replace(keyMatch.group(0), "");
+        text = text.replace(keyMatch.group(0), "");
       }
     }
+    if (!key.isEmpty())
+      this.resource.addProperty(MUS.U11_has_key, key);
+
 
     // extraits
-    String _old = title.trim();
-    title = title.replaceAll("\\(extraits?\\)", "")
-      .replaceAll(": extraits?", "").trim();
-    boolean extrait = !title.equals(_old);
+    String _old = text.trim();
+    text = removeExtrait(text);
+    originalTitle = removeExtrait(originalTitle);
+    boolean extrait = !text.equals(_old);
+
+
+    // note
+    Pattern apresRegex = Pattern.compile(", d'après .+");
+    Matcher apresMatcher = apresRegex.matcher(text);
+    if (apresMatcher.find()) {
+      String note = apresMatcher.group(0).substring(1).trim();
+      text = text.replace(note, "");
+      originalTitle = originalTitle.replace(note, "");
+      addNote(note);
+    }
 
     // alternate title
-    String alternate = "";
     Pattern altRegex = Pattern.compile("\\(([^)]+)\\)");
-    Matcher altMatch = altRegex.matcher(title);
+    Matcher altMatch = altRegex.matcher(text);
     while (altMatch.find()) {
-      alternate = altMatch.group(1).trim();
-      title = title.replace(altMatch.group(0), "").trim();
+      String alternate = altMatch.group(1).trim();
+
+      if (alternate.matches("\\d+")) continue;
+
+      text = text.replace(altMatch.group(0), "").trim();
+      originalTitle = originalTitle.replace(altMatch.group(0), "").trim();
+
+      if (alternate.equalsIgnoreCase("instrumental") || alternate.startsWith("version ")) {
+        this.addNote(alternate);
+        continue;
+      }
+      if (alternate.equalsIgnoreCase("primo")) {
+        this.resource.addProperty(MUS.U10_has_order_number, model.createTypedLiteral(1));
+        continue;
+      }
+      if (alternate.equalsIgnoreCase("secondo")) {
+        this.resource.addProperty(MUS.U10_has_order_number, model.createTypedLiteral(2));
+        continue;
+      }
+
+      if (alternate.startsWith("or "))
+        alternate = alternate.replace("or ", "");
+
+      this.resource.addProperty(MUS.U68_has_variant_title, alternate);
     }
 
     // casting
-    String casting = "";
-    String[] parts = title.split("pour", 2);
+    String[] parts = text.split("pour ", 2);
     if (parts.length > 1
       && !parts[1].startsWith(" précéder")
       && !parts[1].startsWith(" quatuor")
-      && !parts[1].startsWith(" les fous")
-      ) {
-      title = parts[0].trim();
-      casting = "pour " + parts[1].trim();
-      if (casting.contains(":")) {
-        String[] _parts = casting.split(":");
-        title = title + " : " + _parts[1];
-        casting = _parts[0].trim();
+      && !parts[1].startsWith(" le")) {
+      text = parts[0].trim();
+
+      String casting = parts[1].trim();
+      for (String x : ":,dans,\"".split(","))
+        if (casting.contains(":")) {
+          String[] _parts = casting.split(x);
+          text += " " + x + " " + _parts[1];
+          casting = _parts[0].trim();
+        }
+
+      String castingUri = this.uri + "/casting/1";
+      try {
+        M6_Casting cast = new M6_Casting(castingUri, casting);
+        this.resource.addProperty(MUS.U13_has_casting, cast.asResource());
+        this.model.add(cast.getModel());
+      } catch (URISyntaxException e) {
+        e.printStackTrace();
       }
     }
 
     // movement
     String movement = "";
-    parts = title.split(": ", 2);
-    if (parts.length > 1 && areQuotesBalanced(parts)) {
-      title = parts[0].trim();
+    parts = originalTitle.split(": ", 2);
+    if (parts.length > 1 && Utils.areQuotesBalanced(parts)) {
+      originalTitle = parts[0].trim();
       movement = parts[1].trim();
     }
 
     // subtitle
-    String subtitle = "";
-    parts = title.split(", ", 2);
-    if (parts.length > 1 && areQuotesBalanced(parts)) {
-      title = parts[0].trim();
-      subtitle = parts[1].trim();
+    //    String subtitle = "";
+    //    parts = text.split(", ", 2);
+    //    if (parts.length > 1 && areQuotesBalanced(parts)) {
+    //      text = parts[0].trim();
+    //      subtitle = parts[1].trim();
+    //    }
+
+
+    originalTitle = originalTitle.replaceAll(", ?$", "").trim();
+
+    return originalTitle;
+  }
+
+  private static String removeExtrait(String text) {
+    return text.replaceAll("(?i)\\(extraits?\\)", "")
+      .replaceAll(": extraits?", "")
+      .replaceAll("^Extraits de (la)?", "").trim();
+  }
+
+  private void addCatalogue(String note, String code, String num, String composer) {
+    String label = (code != null) ? (code + " " + num) : note;
+
+    Resource M1CatalogStatement =
+      model.createResource(this.uri.toString() + "/catalog/" + label.replaceAll("[ /]", "_"))
+        .addProperty(RDF.type, MUS.M1_Catalogue_Statement)
+        .addProperty(RDFS.label, label)
+        .addProperty(CIDOC.P3_has_note, note.trim());
+
+    this.resource.addProperty(MUS.U16_has_catalogue_statement, M1CatalogStatement);
+
+    if (null == num) {
+      System.out.println("Not parsable catalog: " + note);
+      // Should never happen normally
+      return;
     }
 
+    Resource match = VocabularyManager.getMODS("catalogue")
+      .findModsResource(code, Collections.singletonList(composer));
 
-    title = title.replaceAll(", ?$", "").trim();
+    if (match == null)
+      M1CatalogStatement.addProperty(MUS.U40_has_catalogue_name, code);
+    else M1CatalogStatement.addProperty(MUS.U40_has_catalogue_name, match);
 
-    String[] toPrint = new String[]{origTitle.replaceAll(";", "-"), catLabel, catNum, woo, opus, opusSub, orderNum,
-      key,
-      movement.replaceAll(";", "-"), casting.replaceAll(";", "-"),
-      subtitle.replaceAll(";", "-"), String.valueOf(extrait), alternate.replaceAll(";", "-"), title.replaceAll(";", "-")};
-    System.out.println(String.join(";", toPrint));
-    return title;
+    M1CatalogStatement.addProperty(MUS.U41_has_catalogue_number, num);
   }
 
-  private boolean areQuotesBalanced(String[] parts) {
-    return Arrays.stream(parts)
-      .noneMatch(p -> (StringUtils.countMatches(p, "\"") % 2) != 0 ||
-        (StringUtils.countMatches(p, "(") % 2) != (StringUtils.countMatches(p, "(") % 2));
+  private void addOpus(String note, String number, String subnumber) {
+    Property numProp = MUS.U42_has_opus_number,
+      subProp = MUS.U17_has_opus_statement;
+
+    if (note.substring(0, 3).equalsIgnoreCase("WoO")) {
+      numProp = MUS.U69_has_WoO_number;
+      subProp = MUS.U76_has_WoO_subnumber;
+    }
+
+    String id = number;
+    if (subnumber != null) id += "-" + subnumber;
+
+    Resource M2OpusStatement = model.createResource(this.uri + "/opus/" + id.replaceAll(" ", "_"))
+      .addProperty(RDF.type, MUS.M2_Opus_Statement)
+      .addProperty(CIDOC.P3_has_note, note)
+      .addProperty(RDFS.label, note)
+      .addProperty(numProp, number);
+
+    if (subnumber != null)
+      M2OpusStatement.addProperty(subProp, subnumber);
+
+    this.resource.addProperty(MUS.U17_has_opus_statement, M2OpusStatement);
   }
+
 
 }
