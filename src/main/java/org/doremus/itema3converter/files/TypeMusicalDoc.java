@@ -46,7 +46,7 @@ public class TypeMusicalDoc {
     if (list == null) init();
 
     return list.stream()
-      .filter(x -> x.id == id)
+      .filter(x -> x.id.equals(id))
       .findFirst().orElse(null);
   }
 

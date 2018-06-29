@@ -30,8 +30,10 @@ public class M31_ActorFunction extends DoremusResource {
   private int id;
   @CsvBindByName(column = "TYPE_MORALE_ID")
   public int typeMoraleID;
-  @CsvBindByName(column = "Correspondance", required = true)
+  @CsvBindByName(column = "LIB")
   private String label;
+  @CsvBindByName(column = "Correspondance")
+  private String DoremusLabel;
   @CsvBindByName(column = "CU")
   private String functionID;
   @CsvBindByName(column = "CU_ALT")
@@ -67,7 +69,7 @@ public class M31_ActorFunction extends DoremusResource {
       this.resource = model.createResource(this.uri.toString())
         .addProperty(RDF.type, MUS.M31_Actor_Function)
         .addProperty(CIDOC.P1_is_identified_by, this.label, "fr")
-        .addProperty(RDFS.label, this.label, "fr");
+        .addProperty(RDFS.label, this.getLabel(), "fr");
     } catch (URISyntaxException e) {
       e.printStackTrace();
     }
@@ -136,8 +138,8 @@ public class M31_ActorFunction extends DoremusResource {
       this.uri = ConstructURI.build(this.sourceDb, cName, this.getFunctionId() + appendix);
       this.resource = model.createResource(this.uri.toString())
         .addProperty(RDF.type, cClass)
-        .addProperty(CIDOC.P1_is_identified_by, this.label, "fr")
-        .addProperty(RDFS.label, this.label, "fr");
+        .addProperty(CIDOC.P1_is_identified_by, this.getLabel(), "fr")
+        .addProperty(RDFS.label, this.getLabel(), "fr");
 
     } catch (URISyntaxException e) {
       e.printStackTrace();
@@ -148,6 +150,12 @@ public class M31_ActorFunction extends DoremusResource {
     if (typeMoraleID > 0) return "m" + typeMoraleID;
     return (functionID == null || functionID.isEmpty()) ?
       functionIDAlt : functionID;
+  }
+
+  public String getLabel(){
+    if(DoremusLabel!=null &&!DoremusLabel.isEmpty())
+      return DoremusLabel;
+    return label;
   }
 
   public boolean isInterprete() {

@@ -41,11 +41,11 @@ public class OmuTypeMusicalDoc extends Itema3File {
   }
 
   public String getType() {
-    return TypeMusicalDoc.get(id).getType();
+    return TypeMusicalDoc.get(this.getMusicalType()).getType();
   }
 
   public String getLabel() {
-    return TypeMusicalDoc.get(id).getLabel().toLowerCase();
+    return TypeMusicalDoc.get(this.getMusicalType()).getLabel().toLowerCase();
   }
 
   public boolean isDerivation() {
@@ -57,7 +57,7 @@ public class OmuTypeMusicalDoc extends Itema3File {
   }
 
   public boolean isPeriod() {
-    return TypeMusicalDoc.get(id).isPeriod();
+    return TypeMusicalDoc.get(this.getMusicalType()).isPeriod();
   }
 
   public boolean isGeoContext() {

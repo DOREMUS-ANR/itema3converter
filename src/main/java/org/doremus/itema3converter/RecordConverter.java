@@ -74,6 +74,7 @@ public class RecordConverter {
     // Performed expression for this performance
     for (ItemOmu io : ItemOmu.byItem(item.getId())) {
       Omu omu = io.getOmu();
+      if (omu.getTitle().equalsIgnoreCase("annonce bis")) continue;
 
       M42_PerformedExpressionCreation pec = new M42_PerformedExpressionCreation(omu, f31);
       M43_PerformedExpression pe = new M43_PerformedExpression(omu);

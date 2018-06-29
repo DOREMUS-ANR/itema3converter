@@ -21,14 +21,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class F22_SelfContainedExpression extends DoremusResource {
-  private static final String numRegexString = "(?: n(?:[°º]|o\\.?) ?(\\d+))";
+  private static final String numRegexString = "(?: n(?:[°º.]|o\\.?) ?(\\d+))";
   private static final Pattern opusRegex = Pattern.compile(" op(?:us|[. ]) ?(?:posth )?(\\d+[a-z]*)" +
-      numRegexString + "?",
+    numRegexString + "?", Pattern.CASE_INSENSITIVE);
+  private static final Pattern wooPattern = Pattern.compile("woo ([0-9a-z]+)" + numRegexString + "?",
     Pattern.CASE_INSENSITIVE);
+
   private static final Pattern orderNumRegex = Pattern.compile(numRegexString, Pattern.CASE_INSENSITIVE);
   private static final Pattern livreRegex = Pattern.compile("Livre [0-9I]+", Pattern.CASE_INSENSITIVE);
-  private static final Pattern keyRegex = Pattern.compile(" en ([^ ]+(?: (dièse|bémol))? (maj|min)(eur)?)", Pattern
-    .CASE_INSENSITIVE);
+  private static final Pattern keyRegex = Pattern.compile(" en ([^ ]+(?: (dièse|bémol))? (maj|min)(eur)?)",
+    Pattern.CASE_INSENSITIVE);
   private static final Pattern engKeyRegex = Pattern.compile(" in (.+ (maj|min)(or)?)", Pattern.CASE_INSENSITIVE);
   private Property MODSidProp;
 
@@ -93,10 +95,10 @@ public class F22_SelfContainedExpression extends DoremusResource {
     text = text.replaceAll("op\\.? ?posth\\.?", "");
 
     // WoO number
-    Pattern wooPattern = Pattern.compile("woo (\\d[0-9a-z])*" + numRegexString + "?", Pattern.CASE_INSENSITIVE);
+    System.out.println("woo (\\d[0-9a-z])*" + numRegexString + "?");
     Matcher wooMatch = wooPattern.matcher(text);
     if (wooMatch.find()) {
-      String note = opusMatch.group(0);
+      String note = wooMatch.group(0);
       String woo = wooMatch.group(1);
       String subWoo = wooMatch.group(2);
       addOpus(note, woo, subWoo);
@@ -187,6 +189,7 @@ public class F22_SelfContainedExpression extends DoremusResource {
 
       text = text.replace(altMatch.group(0), "").trim();
       originalTitle = originalTitle.replace(altMatch.group(0), "").trim();
+      if (alternate.equalsIgnoreCase("bis")) continue;
 
       if (alternate.equalsIgnoreCase("instrumental") || alternate.startsWith("version ")) {
         this.addNote(alternate);
@@ -250,7 +253,10 @@ public class F22_SelfContainedExpression extends DoremusResource {
     //    }
 
 
-    originalTitle = originalTitle.replaceAll(", ?$", "").trim();
+    originalTitle = originalTitle
+      .replaceAll(" +", " ") // remove double spaces
+      .replaceAll(", ?$", "")  // remove last comma
+      .trim();
 
     return originalTitle;
   }
