@@ -41,7 +41,7 @@ public class Utils {
   public static boolean areQuotesBalanced(String[] parts) {
     return Arrays.stream(parts)
       .noneMatch(p -> (StringUtils.countMatches(p, "\"") % 2) != 0 ||
-        (StringUtils.countMatches(p, "(") % 2) != (StringUtils.countMatches(p, "(") % 2));
+        (StringUtils.countMatches(p, "(") % 2) != (StringUtils.countMatches(p, ")") % 2));
   }
 
 

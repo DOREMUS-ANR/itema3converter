@@ -29,7 +29,7 @@ public class F22_SelfContainedExpression extends DoremusResource {
     Pattern.CASE_INSENSITIVE);
 
   private static final Pattern orderNumRegex = Pattern.compile(numRegexString, Pattern.CASE_INSENSITIVE);
-  private static final Pattern livreRegex = Pattern.compile("Livre [0-9I]+", Pattern.CASE_INSENSITIVE);
+  private static final Pattern livreRegex = Pattern.compile("Livre [0-9IV]+", Pattern.CASE_INSENSITIVE);
   private static final Pattern keyRegex = Pattern.compile(" en ([^ ]+(?: (dièse|bémol))? (maj|min)(eur)?)",
     Pattern.CASE_INSENSITIVE);
   private static final Pattern engKeyRegex = Pattern.compile(" in (.+ (maj|min)(or)?)", Pattern.CASE_INSENSITIVE);
@@ -42,8 +42,6 @@ public class F22_SelfContainedExpression extends DoremusResource {
 
   public F22_SelfContainedExpression(Omu omu, List<String> composers, String title) {
     super(omu);
-    System.out.println(" op(?:us|[. ]) ?(?:posth )?(\\d+[a-z]*)" +
-      numRegexString + "?");
     isMother = title != null;
     if (isMother) {
       this.identifier = "m" + omu.getId();
@@ -67,9 +65,9 @@ public class F22_SelfContainedExpression extends DoremusResource {
           continue;
         case "categorization":
           Resource style = model.createResource()
-            .addProperty(RDF.type, MUS.M19_Style)
+            .addProperty(RDF.type, MUS.M19_Categorization)
             .addProperty(RDFS.label, ot.getLabel());
-          this.resource.addProperty(MUS.U19_has_style, style);
+          this.resource.addProperty(MUS.U19_is_categorized_as, style);
           // I do not break because categorizations are also genres
         case "genre":
           this.resource.addProperty(MUS.U12_has_genre, model.createResource(ot.getUri()));
@@ -97,6 +95,7 @@ public class F22_SelfContainedExpression extends DoremusResource {
 
 
   private String extractTokens(String text, List<String> composers) {
+    text = text.replaceAll(":$", "");
     String originalTitle = text;
 
     this.isMother = true;
@@ -121,14 +120,18 @@ public class F22_SelfContainedExpression extends DoremusResource {
     // opus number
     Matcher opusMatch = opusRegex.matcher(text);
     if (opusMatch.find()) {
-      String note = opusMatch.group(0);
+      String note = opusMatch.group(0).trim();
       String opus = opusMatch.group(1);
       String opusSub = opusMatch.group(2);
 
       addOpus(note, opus, opusSub);
       text = text.replace(note, "");
     }
-    text = text.replaceAll("op\\.? ?posth\\.?", "");
+    String op = text.replaceAll("op\\.? ?posth\\.?", "");
+    if (!op.equals(text)) {
+      addNote("Op. posth.");
+      text = op;
+    }
 
     // WoO number
     Matcher wooMatch = wooPattern.matcher(text);
@@ -246,7 +249,7 @@ public class F22_SelfContainedExpression extends DoremusResource {
     }
 
     // casting
-    parts = text.split("pour ", 2);
+    parts = text.split(" pour ", 2);
     if (parts.length > 1
       && !parts[1].startsWith(" précéder")
       && !parts[1].startsWith(" quatuor")
@@ -255,8 +258,9 @@ public class F22_SelfContainedExpression extends DoremusResource {
 
       String casting = parts[1].trim();
       for (String x : ":,dans,\"".split(","))
-        if (casting.contains(":")) {
-          String[] _parts = casting.split(x);
+        if (casting.contains(x)) {
+          String[] _parts = casting.split(x, 2);
+          if (parts.length <= 1) continue;
           text += " " + x + " " + _parts[1];
           casting = _parts[0].trim();
         }

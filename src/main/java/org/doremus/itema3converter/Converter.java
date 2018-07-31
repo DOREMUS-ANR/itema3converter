@@ -42,7 +42,7 @@ public class Converter {
   static Logger log = MyLogger.getLogger(Converter.class.getName());
   private static final String UTF8_BOM = "\uFEFF";
   public static Resource RADIO_FRANCE = ResourceFactory.createResource("http://data.doremus.org/organization/Radio_France");
-
+  public static Resource DOREMUS = ResourceFactory.createResource("http://data.doremus.org/organization/DOREMUS");
 
   static Properties properties;
   static String dataFolderPath;
@@ -211,7 +211,6 @@ public class Converter {
     try {
       RecordConverter r = new RecordConverter(mc);
       Model m = r.getModel();
-
       if (m == null) return;
 
       String newFileName = mc.getName().replaceFirst(".xml", ".ttl");

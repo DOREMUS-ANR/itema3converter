@@ -62,7 +62,7 @@ public class M31_ActorFunction extends DoremusResource {
     this.resource = null;
   }
 
-  public M31_ActorFunction(String label){
+  public M31_ActorFunction(String label) {
     try {
       this.uri = ConstructURI.build(this.sourceDb, this.className, label);
       this.label = label;
@@ -141,7 +141,8 @@ public class M31_ActorFunction extends DoremusResource {
         .addProperty(CIDOC.P1_is_identified_by, this.getLabel(), "fr")
         .addProperty(RDFS.label, this.getLabel(), "fr");
 
-    } catch (URISyntaxException e) {
+    } catch (URISyntaxException | NullPointerException e) {
+      System.out.println("ERROR");
       e.printStackTrace();
     }
   }
@@ -152,8 +153,8 @@ public class M31_ActorFunction extends DoremusResource {
       functionIDAlt : functionID;
   }
 
-  public String getLabel(){
-    if(DoremusLabel!=null &&!DoremusLabel.isEmpty())
+  public String getLabel() {
+    if (DoremusLabel != null && !DoremusLabel.isEmpty())
       return DoremusLabel;
     return label;
   }

@@ -123,6 +123,8 @@ public class E21_Person extends DoremusResource {
     addProperty(FOAF.firstName, firstName);
     addProperty(FOAF.surname, lastName);
     addProperty(FOAF.name, this.getFullName());
+    addProperty(FOAF.name, pseudo);
+
     addProperty(RDFS.label, this.getFullName());
     addProperty(CIDOC.P131_is_identified_by, this.getIdentification());
     addProperty(DCTerms.identifier, record.getId());

@@ -7,8 +7,6 @@ import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.RDFS;
 import org.doremus.itema3converter.ConstructURI;
-import org.doremus.itema3converter.Converter;
-import org.doremus.itema3converter.RecordConverter;
 import org.doremus.itema3converter.files.Itema3File;
 import org.doremus.ontology.CIDOC;
 
@@ -48,11 +46,9 @@ public abstract class DoremusResource {
     regenerateResource();
   }
 
-  static int counter = 0;
-
   protected void setUri(String uri) throws URISyntaxException {
     if (this.uri != null && uri.equals(this.uri.toString())) return;
-    System.out.println(++counter);
+
     this.uri = new URI(uri);
     if (this.resource != null)
       this.resource = ResourceUtils.renameResource(this.resource, uri);

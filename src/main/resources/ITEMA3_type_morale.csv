@@ -1,4 +1,4 @@
-TYPE_MORALE_ID,Libellé,Correspondance,Auteur,Interprète,type de dérivation,Commentaires
+TYPE_MORALE_ID,LIB,Correspondance,Auteur,Interprète,type de dérivation,Commentaires
 1,orchestre,,,1,,M14 MOP orchestre@fre (iaml)
 2,chœur,,,1,,M14 MOP choeur@fre (iaml)
 3,éditeur,,,,,pas dans les données

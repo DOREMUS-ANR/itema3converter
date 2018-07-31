@@ -244,7 +244,7 @@ public class RecordConverter {
 
   private void addProvenanceTo(DoremusResource res) {
     res.asResource().addProperty(RDF.type, PROV.Entity)
-      .addProperty(PROV.wasAttributedTo, model.createResource("http://data.doremus.org/organization/DOREMUS"))
+      .addProperty(PROV.wasAttributedTo, Converter.DOREMUS)
       .addProperty(PROV.wasDerivedFrom, this.provEntity)
       .addProperty(PROV.wasGeneratedBy, this.provActivity);
   }
