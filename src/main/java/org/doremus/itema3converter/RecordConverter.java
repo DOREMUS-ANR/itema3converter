@@ -114,6 +114,7 @@ public class RecordConverter {
         F22_SelfContainedExpression f22m = new F22_SelfContainedExpression(omu, f28.getComposers(), f22.getMotherWorkTitle());
         f14m.add(f22m);
         f14m.add(f14);
+        f22m.add(f22);
         f28.add(f14m).add(f22m);
         model.add(f22m.getModel()).add(f14m.getModel());
       }
