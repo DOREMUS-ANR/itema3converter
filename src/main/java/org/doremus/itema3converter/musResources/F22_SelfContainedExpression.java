@@ -149,7 +149,7 @@ public class F22_SelfContainedExpression extends DoremusResource {
         StmtIterator it = res.listProperties(MODSidProp);
         while (it.hasNext()) {
           String code = it.nextStatement().getString();
-          Pattern catPattern = Pattern.compile(" " + code + "[ .] ?(\\d[0-9a-z]*)" + numRegexString + "?",
+          Pattern catPattern = Pattern.compile(" " + code + "[ .]? ?(\\d[0-9a-z]*)" + numRegexString + "?",
             Pattern.CASE_INSENSITIVE);
           Matcher catMatch = catPattern.matcher(text);
           if (catMatch.find()) {
