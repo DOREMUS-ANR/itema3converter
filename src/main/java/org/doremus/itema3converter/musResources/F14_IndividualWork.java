@@ -11,17 +11,19 @@ public class F14_IndividualWork extends DoremusResource {
 
   public F14_IndividualWork(Omu omu) {
     super(omu);
-    this.resource.addProperty(RDF.type, FRBROO.F14_Individual_Work);
+    this.resource.addProperty(RDF.type, FRBROO.F14_Individual_Work)
+      .addProperty(MUS.U94_has_work_type, "musical work");
     parseRecord();
   }
 
   public F14_IndividualWork(Omu omu, String identifier) {
     super(omu, identifier);
-    this.resource.addProperty(RDF.type, FRBROO.F14_Individual_Work);
+    this.resource.addProperty(RDF.type, FRBROO.F14_Individual_Work)
+      .addProperty(MUS.U94_has_work_type, "musical work");
     parseRecord();
   }
 
-  private void parseRecord(){
+  private void parseRecord() {
     // derivation type
     OmuTypeMusicalDoc.byOmu(this.record.getId())
       .stream()
