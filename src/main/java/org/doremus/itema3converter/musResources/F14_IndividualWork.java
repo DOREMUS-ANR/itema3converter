@@ -8,6 +8,8 @@ import org.doremus.ontology.FRBROO;
 import org.doremus.ontology.MUS;
 
 public class F14_IndividualWork extends DoremusResource {
+  private F22_SelfContainedExpression expression;
+  private F28_ExpressionCreation event;
 
   public F14_IndividualWork(Omu omu) {
     super(omu);
@@ -37,6 +39,7 @@ public class F14_IndividualWork extends DoremusResource {
 
   public F14_IndividualWork add(F22_SelfContainedExpression f22) {
     this.resource.addProperty(FRBROO.R9_is_realised_in, f22.asResource());
+    this.expression = f22;
     return this;
   }
 
@@ -44,4 +47,33 @@ public class F14_IndividualWork extends DoremusResource {
     this.resource.addProperty(CIDOC.P148_has_component, child.asResource());
     return this;
   }
+
+  public F22_SelfContainedExpression getExpression() {
+    return expression;
+  }
+
+  public F28_ExpressionCreation getEvent() {
+    System.out.println("get "+ this.getIdentifier());
+    System.out.println(event);
+    return event;
+  }
+
+  public void setEvent(F28_ExpressionCreation event) {
+    System.out.println("set "+ this.getIdentifier());
+    System.out.println(event);
+    this.event = event;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null) return false;
+    if (getClass() != o.getClass()) return false;
+
+    F14_IndividualWork w = (F14_IndividualWork) o;
+    return
+      w.getExpression().getTitle().equals(this.getExpression().getTitle())
+      && w.getEvent().equals(this.getEvent());
+  }
+
 }

@@ -14,6 +14,7 @@ import java.util.Date;
 
 public class E52_TimeSpan extends DoremusResource {
   public static final DateFormat ISODateFormat = new SimpleDateFormat("yyyy-MM-dd");
+  private String label;
   private Literal start, end;
 
   private Precision quality;
@@ -46,7 +47,7 @@ public class E52_TimeSpan extends DoremusResource {
   public E52_TimeSpan(URI uri, Date start, Date end) {
     super(uri);
 
-    String label = ISODateFormat.format(start).substring(0, 10);
+    label = ISODateFormat.format(start).substring(0, 10);
     if (!end.equals(start)) label += "/" + ISODateFormat.format(end).substring(0, 10);
     this.start = model.createTypedLiteral(ISODateFormat.format(start), XSDDatatype.XSDdate);
     this.end = model.createTypedLiteral(ISODateFormat.format(end), XSDDatatype.XSDdate);
@@ -69,7 +70,7 @@ public class E52_TimeSpan extends DoremusResource {
     this.start = start;
     this.end = end;
 
-    String label = start.getLexicalForm();
+    label = start.getLexicalForm();
     if (end != null && !end.equals(start)) label += "/" + end.getLexicalForm();
 
     this.resource = model.createResource(uri.toString())
@@ -94,6 +95,16 @@ public class E52_TimeSpan extends DoremusResource {
 
     this.resource.addProperty(CIDOC.P79_beginning_is_qualified_by, quality.toString())
       .addProperty(CIDOC.P80_end_is_qualified_by, quality.toString());
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null) return false;
+    if (getClass() != o.getClass()) return false;
+
+    E52_TimeSpan ts = (E52_TimeSpan) o;
+    return ts.label.equals(this.label);
   }
 
 }

@@ -2,16 +2,13 @@ package org.doremus.itema3converter.musResources;
 
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
-import org.apache.jena.vocabulary.RDFS;
 import org.doremus.itema3converter.Converter;
 import org.doremus.itema3converter.files.Omu;
 import org.doremus.itema3converter.files.OmuPersonne;
 import org.doremus.itema3converter.files.OmuTypeMusicalDoc;
 import org.doremus.ontology.CIDOC;
 import org.doremus.ontology.FRBROO;
-import org.doremus.ontology.MUS;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -125,7 +122,6 @@ public class F28_ExpressionCreation extends DoremusResource {
       if (activity.getAf() != null && activity.getAf().isAPlanningRole())
         this.resource.addProperty(CIDOC.P9_consists_of, activity.asResource());
     }
-
   }
 
   public List<String> getComposers() {
@@ -134,11 +130,26 @@ public class F28_ExpressionCreation extends DoremusResource {
 
   public F28_ExpressionCreation add(F14_IndividualWork f14) {
     this.resource.addProperty(FRBROO.R19_created_a_realisation_of, f14.asResource());
+    f14.setEvent(this);
     return this;
   }
 
   public F28_ExpressionCreation add(F22_SelfContainedExpression f22) {
     this.resource.addProperty(FRBROO.R17_created, f22.asResource());
     return this;
+  }
+
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null) return false;
+    if (getClass() != o.getClass()) return false;
+
+    F28_ExpressionCreation evt = (F28_ExpressionCreation) o;
+    for (String c : composer)
+      if(!evt.composer.contains(c)) return false;
+
+    return this.timeSpan.equals(evt.timeSpan);
   }
 }

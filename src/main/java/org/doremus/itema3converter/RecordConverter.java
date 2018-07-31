@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 public class RecordConverter {
   private static Logger log = MyLogger.getLogger(RecordConverter.class.getName());
   private Resource provEntity, provActivity;
+  private List<F14_IndividualWork> motherList;
 
   private Model model;
 
@@ -35,6 +36,7 @@ public class RecordConverter {
     log.setLevel(Level.WARNING);
 
     model = ModelFactory.createDefaultModel();
+    motherList = new ArrayList<>();
 
     MagContenu mag = MagContenu.fromFile(mc);
 
@@ -113,10 +115,22 @@ public class RecordConverter {
         F14_IndividualWork f14m = new F14_IndividualWork(omu, "m" + omu.getId());
         F22_SelfContainedExpression f22m = new F22_SelfContainedExpression(omu, f28.getComposers(), f22.getMotherWorkTitle());
         f14m.add(f22m);
+        f28.add(f14m).add(f22m);
+
+        int idx = motherList.indexOf(f14m);
+        if (idx != -1) {
+          f14m = motherList.get(idx);
+          f22m = f14m.getExpression();
+          f28 = f14m.getEvent();
+          f28.add(f22).add(f14);
+        } else {
+          model.add(f22m.getModel()).add(f14m.getModel());
+        }
+
         f14m.add(f14);
         f22m.add(f22);
-        f28.add(f14m).add(f22m);
-        model.add(f22m.getModel()).add(f14m.getModel());
+
+        motherList.add(f14m);
       }
 
       pp.add(f22);

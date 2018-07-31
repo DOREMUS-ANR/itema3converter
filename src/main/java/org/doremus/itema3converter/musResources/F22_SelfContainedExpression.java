@@ -39,6 +39,7 @@ public class F22_SelfContainedExpression extends DoremusResource {
 
   private String motherWorkTitle;
   private boolean isMother;
+  private final String title;
 
   public F22_SelfContainedExpression(Omu omu, List<String> composers, String title) {
     super(omu);
@@ -48,13 +49,13 @@ public class F22_SelfContainedExpression extends DoremusResource {
       regenerateResource();
     } else title = omu.getTitle();
 
-    System.out.println(title);
+    // System.out.println(title);
 
-    title = extractTokens(title, composers);
+    this.title = extractTokens(title, composers);
 
     this.resource.addProperty(RDF.type, FRBROO.F22_Self_Contained_Expression)
-      .addProperty(CIDOC.P102_has_title, title)
-      .addProperty(RDFS.label, title);
+      .addProperty(CIDOC.P102_has_title, this.title)
+      .addProperty(RDFS.label, this.title);
 
     if (!isMother) return;
 
@@ -204,8 +205,7 @@ public class F22_SelfContainedExpression extends DoremusResource {
     String _old = text.trim();
     text = removeExtrait(text);
     originalTitle = removeExtrait(originalTitle);
-    boolean extrait = !text.equals(_old);
-
+    // boolean extrait = !text.equals(_old);
 
     // note
     Pattern apresRegex = Pattern.compile(", d'après .+");
@@ -362,9 +362,13 @@ public class F22_SelfContainedExpression extends DoremusResource {
     this.resource.addProperty(MUS.U17_has_opus_statement, M2OpusStatement);
   }
 
-
   public F22_SelfContainedExpression add(F22_SelfContainedExpression child) {
     this.resource.addProperty(FRBROO.R5_has_component, child.asResource());
     return this;
   }
+
+  public String getTitle() {
+    return this.title;
+  }
+
 }
