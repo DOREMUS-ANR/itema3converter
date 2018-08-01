@@ -1,6 +1,5 @@
 package org.doremus.itema3converter.musResources;
 
-import org.apache.jena.ontology.OntClass;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.doremus.itema3converter.files.Invite;
@@ -19,6 +18,7 @@ public class M28_IndividualPerformance extends DoremusResource {
   private int professionID, typeMoraleID;
   private final int instrument, tessitura;
   private final String role;
+  private final boolean guest;
 
 
   public M28_IndividualPerformance(Invite record, URI uri) {
@@ -32,6 +32,7 @@ public class M28_IndividualPerformance extends DoremusResource {
     this.instrument = 0;
     this.tessitura = 0;
     this.role = null;
+    this.guest = true;
 
     if (professionID == 10) {
       // considerer qu'il s'agit d'une erreur et remplacer par PROFESSION_ID=2 Animateur, Presentateur
@@ -56,6 +57,7 @@ public class M28_IndividualPerformance extends DoremusResource {
     this.instrument = record.instrumentId;
     this.tessitura = record.tessitureId;
     this.role = record.role;
+    this.guest = false;
 
     init();
   }
@@ -92,6 +94,10 @@ public class M28_IndividualPerformance extends DoremusResource {
         model.createResource().addProperty(RDF.type, FRBROO.F38_Character)
           .addProperty(RDFS.label, role)
       );
+    }
+
+    if(this.guest){
+      this.resource.addProperty(MUS.U81_had_performer_status, "guest artist");
     }
   }
 }
