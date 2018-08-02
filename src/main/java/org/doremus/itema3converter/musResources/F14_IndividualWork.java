@@ -53,14 +53,10 @@ public class F14_IndividualWork extends DoremusResource {
   }
 
   public F28_ExpressionCreation getEvent() {
-    System.out.println("get "+ this.getIdentifier());
-    System.out.println(event);
     return event;
   }
 
   public void setEvent(F28_ExpressionCreation event) {
-    System.out.println("set "+ this.getIdentifier());
-    System.out.println(event);
     this.event = event;
   }
 

@@ -40,7 +40,7 @@ public class RecordConverter {
 
     MagContenu mag = MagContenu.fromFile(mc);
 
-    System.out.println("\n\nMAG_CONTENU " + mag.getId());
+    System.out.println(mag.getId());
 
     Item item = Item.fromFile(getFile("ITEM", mag.getItemId()));
     assert item != null;

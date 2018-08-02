@@ -206,7 +206,7 @@ public class Converter {
   }
 
   private static void parseRecord(File mc, String outputFolder) {
-//    if (!mc.getName().equals("1323968.xml")) return;
+//    if(!mc.getName().equals("1323968.xml")) return;
 
     try {
       RecordConverter r = new RecordConverter(mc);
@@ -236,6 +236,7 @@ public class Converter {
     m.setNsPrefix("efrbroo", FRBROO.getURI());
     m.setNsPrefix("xsd", XSD.getURI());
     m.setNsPrefix("dcterms", DCTerms.getURI());
+    m.setNsPrefix("dc", DC.getURI());
     m.setNsPrefix("owl", OWL.getURI());
     m.setNsPrefix("foaf", FOAF.getURI());
     m.setNsPrefix("rdfs", RDFS.getURI());

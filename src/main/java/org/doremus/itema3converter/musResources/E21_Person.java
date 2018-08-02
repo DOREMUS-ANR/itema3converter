@@ -7,7 +7,7 @@ import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.vocabulary.FOAF;
-import org.apache.jena.vocabulary.DCTerms;
+import org.apache.jena.vocabulary.DC;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -127,7 +127,7 @@ public class E21_Person extends DoremusResource {
 
     addProperty(RDFS.label, this.getFullName());
     addProperty(CIDOC.P131_is_identified_by, this.getIdentification());
-    addProperty(DCTerms.identifier, record.getId());
+    addProperty(DC.identifier, record.getId());
 
     try {
       addDate(formatDate(birthDate, birthYear), false);

@@ -1,6 +1,6 @@
 package org.doremus.itema3converter.musResources;
 
-import org.apache.jena.vocabulary.DCTerms;
+import org.apache.jena.vocabulary.DC;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.doremus.itema3converter.files.MagSupport;
@@ -26,9 +26,9 @@ public class F4_ManifestationSingleton extends DoremusResource {
 
     // N. Magneto
     if (!support.numMagneto.isEmpty()) {
-      this.resource.removeAll(DCTerms.identifier);
+      this.resource.removeAll(DC.identifier);
       this.resource
-        .addProperty(DCTerms.identifier, support.numMagneto)
+        .addProperty(DC.identifier, support.numMagneto)
         .addProperty(CIDOC.P1_is_identified_by, support.numMagneto);
     }
   }

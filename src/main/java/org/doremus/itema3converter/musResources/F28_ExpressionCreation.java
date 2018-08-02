@@ -12,10 +12,7 @@ import org.doremus.ontology.FRBROO;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class F28_ExpressionCreation extends DoremusResource {
 
@@ -150,6 +147,7 @@ public class F28_ExpressionCreation extends DoremusResource {
     for (String c : composer)
       if(!evt.composer.contains(c)) return false;
 
-    return this.timeSpan.equals(evt.timeSpan);
+    if(this.timeSpan ==null && evt.timeSpan == null) return true;
+    return Objects.equals(this.timeSpan, evt.timeSpan);
   }
 }
