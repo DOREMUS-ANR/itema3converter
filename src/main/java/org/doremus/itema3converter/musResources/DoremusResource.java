@@ -46,10 +46,14 @@ public abstract class DoremusResource {
     regenerateResource();
   }
 
-  protected void setUri(String uri) throws URISyntaxException {
+  protected void setUri(String uri) {
     if (this.uri == null || uri.equals(this.uri.toString())) return;
 
-    this.uri = new URI(uri);
+    try {
+      this.uri = new URI(uri);
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
+    }
     if (this.resource != null)
       this.resource = ResourceUtils.renameResource(this.resource, uri);
   }

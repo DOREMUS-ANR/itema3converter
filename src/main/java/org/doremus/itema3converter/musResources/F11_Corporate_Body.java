@@ -1,60 +1,83 @@
 package org.doremus.itema3converter.musResources;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
+import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.doremus.itema3converter.Converter;
+import org.doremus.itema3converter.Utils;
 import org.doremus.itema3converter.files.Morale;
 import org.doremus.ontology.CIDOC;
 import org.doremus.ontology.FRBROO;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class F11_Corporate_Body extends DoremusResource {
+  private static HashMap<String, String> cache = null;
+
   private String name;
   private String birthDate, deathDate;
+  private String comment;
 
   public F11_Corporate_Body(Morale record) throws NullPointerException {
     super(record.getId());
+    if (cache == null) loadCache();
+
     this.record = record;
-    this.name = fixCase(record.getName());
+
+    this.name = Utils.fixCase(record.getName());
     if (this.name == null) throw new NullPointerException("The name of a Corporate Body cannot be null");
+
     this.birthDate = record.getBirthDate();
     this.deathDate = record.getDeathDate();
+    this.comment = record.getComment();
 
+    String uriCache = cache.get(identifier);
+    if (uriCache == null || uriCache.isEmpty()) {
+      Resource r = getFromDoremus(this.name);
+      if (r != null) {
+        this.resource = r;
+        setUri(r.getURI());
+      }
+    } else setUri(uriCache);
+
+    addToCache(record.getId(), this.uri.toString());
     initResource();
   }
 
   public F11_Corporate_Body(String id) {
-    super(id);
-    if (!Converter.organizationExists(id))
+    if (cache == null) loadCache();
+    String uriCache = cache.get(id);
+    if (uriCache == null || uriCache.isEmpty()) {
       Converter.parseOrganization(id);
+      uriCache = cache.get(id);
+    }
+
+    try {
+      uri = new URI(uriCache);
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
+    }
+
+    this.resource = model.createResource(uri.toString());
+
+//    super(id);
+//    if (!Converter.organizationExists(id))
+//      Converter.parseOrganization(id);
   }
 
   public String getName() {
     return name;
   }
 
-  private String fixCase(String str) {
-    if (str == null) return null;
-    str = str.trim();
-    if (str.isEmpty()) return null;
-    if (!StringUtils.isAllUpperCase(str.replaceAll("[^\\w]", ""))) return str;
-
-    return Arrays.stream(str.toLowerCase().split(" "))
-      .map(StringUtils::capitalize)
-      .collect(Collectors.joining(" "));
-  }
-
   private Resource initResource() {
-    Morale r = (Morale) record;
     resource.addProperty(RDF.type, FRBROO.F11_Corporate_Body)
       .addProperty(RDFS.label, this.name)
       .addProperty(CIDOC.P131_is_identified_by, this.name);
@@ -78,8 +101,7 @@ public class F11_Corporate_Body extends DoremusResource {
     //  a) F11 Corporate Body P14i performed F51 Pursuit P2 has type E55 Type
     //  b) F11 Corporate Body P14i performed F51 Pursuit R59 had typical subject E1 CRM Entity
 
-    String comment = r.getComment().trim();
-    if (!comment.equals(this.name)) addNote(comment);
+    if (!this.name.equals(comment)) addNote(comment);
 
     return resource;
   }
@@ -152,6 +174,10 @@ public class F11_Corporate_Body extends DoremusResource {
     } else
       note = date;
 
+    addNote(note);
+
+    if (d == null) return null;
+
     try {
       ts = new E52_TimeSpan(new URI(uri), d, dEnd);
       ts.setQuality(precision);
@@ -160,8 +186,56 @@ public class F11_Corporate_Body extends DoremusResource {
       e.printStackTrace();
       return null;
     }
-    addNote(note);
     return ts;
+  }
+
+  private static final String NAME_SPARQL = "PREFIX rdfs: <" + RDFS.getURI() + ">\n" +
+    "PREFIX efrbroo: <" + FRBROO.getURI() + ">\n" +
+    "SELECT DISTINCT ?s " +
+    "WHERE { ?s a efrbroo:F11_Corporate_Body; rdfs:label ?o. " +
+    "FILTER (lcase(str(?o)) = ?name) }";
+
+  public static Resource getFromDoremus(String name) {
+    ParameterizedSparqlString pss = new ParameterizedSparqlString();
+    pss.setCommandText(NAME_SPARQL);
+    pss.setLiteral("name", name.toLowerCase());
+
+    return (Resource) Utils.queryDoremus(pss, "s");
+  }
+
+  public static void loadCache() {
+    cache = new HashMap<>();
+    try {
+      FileInputStream fis = new FileInputStream("organization.properties");
+      Properties properties = new Properties();
+      properties.load(fis);
+
+      for (String key : properties.stringPropertyNames()) {
+        cache.put(key, properties.get(key).toString());
+      }
+    } catch (IOException e) {
+      System.out.println("No 'person.properties' file found. I will create it.");
+    }
+
+  }
+
+  private static void addToCache(String key, String value) {
+    cache.put(key, value);
+    saveCache();
+  }
+
+  private static void saveCache() {
+    Properties properties = new Properties();
+
+    for (Map.Entry<String, String> entry : cache.entrySet()) {
+      properties.put(entry.getKey(), entry.getValue() + "");
+    }
+
+    try {
+      properties.store(new FileOutputStream("organization.properties"), null);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
 }

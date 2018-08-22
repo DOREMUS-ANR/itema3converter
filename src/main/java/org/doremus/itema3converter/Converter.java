@@ -128,10 +128,13 @@ public class Converter {
 
   private static void parsePerson(File p, String outputFolder, boolean force) {
     Personne ps = Personne.fromFile(p);
+
+//    if(E21_Person.isInCache(ps.getId())) return;
+
     if (!force && ps.getStatus() != 1) return;
     try {
       E21_Person person = new E21_Person(ps);
-//      log.info("Person : " + ps.getId() + " " + person.getFullName());
+      log.info("Person : " + ps.getId() + " " + person.getFullName());
 
       writeTtl(person.getModel(), Paths.get(outputFolder, p.getName().replaceFirst(".xml", ".ttl")).toString());
     } catch (URISyntaxException | IOException | RuntimeException e) {
@@ -158,6 +161,7 @@ public class Converter {
       Model m = cb.getModel();
       writeTtl(m, Paths.get(outputFolder, p.getName().replaceFirst(".xml", ".ttl")).toString());
     } catch (NullPointerException e) {
+      e.printStackTrace();
       log.severe("Corporate without name: " + mr.getId());
     } catch (IOException e) {
       e.printStackTrace();
