@@ -90,12 +90,19 @@ public class F28_ExpressionCreation extends DoremusResource {
     String[] parts = date.split("-", 2);
     List<Literal> literals = new ArrayList<>();
 
+    List<Boolean> uncertain = new ArrayList<>();
+
     for (String p : parts) {
       p = p.trim();
       // Move it to ISO format
       List<String> comps = Arrays.asList(p.split("/", 3));
       Collections.reverse(comps);
       String value = String.join("-", comps);
+
+      boolean uct = value.contains("environ");
+      uncertain.add(uct);
+      if (uct)
+        value = value.replace("environ", "").trim();
 
       // From length detect Datatype
       XSDDatatype type = comps.size() == 3 ? XSDDatatype.XSDdate :
@@ -106,8 +113,13 @@ public class F28_ExpressionCreation extends DoremusResource {
 
     Literal start = literals.get(0);
     Literal end = literals.get(literals.size() - 1);
+    boolean uctStart = uncertain.get(0);
+    boolean uctEnd = uncertain.get(uncertain.size() - 1);
 
-    return new E52_TimeSpan(new URI(this.uri + "/time"), start, end);
+    E52_TimeSpan ts = new E52_TimeSpan(new URI(this.uri + "/time"), start, end);
+    if (uctStart) ts.setQualityStart(E52_TimeSpan.Precision.UNCERTAINTY);
+    if (uctEnd) ts.setQualityStart(E52_TimeSpan.Precision.UNCERTAINTY);
+    return ts;
   }
 
   private void parsePerformancePlan() {
@@ -145,9 +157,9 @@ public class F28_ExpressionCreation extends DoremusResource {
 
     F28_ExpressionCreation evt = (F28_ExpressionCreation) o;
     for (String c : composer)
-      if(!evt.composer.contains(c)) return false;
+      if (!evt.composer.contains(c)) return false;
 
-    if(this.timeSpan ==null && evt.timeSpan == null) return true;
+    if (this.timeSpan == null && evt.timeSpan == null) return true;
     return Objects.equals(this.timeSpan, evt.timeSpan);
   }
 }

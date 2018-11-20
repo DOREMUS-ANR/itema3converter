@@ -90,11 +90,22 @@ public class E52_TimeSpan extends DoremusResource {
   }
 
   public void setQuality(Precision quality) {
+    setQualityStart(quality);
+    setQualityEnd(quality);
+  }
+
+  public void setQualityStart(Precision quality) {
     if (quality == null) return;
     this.quality = quality;
 
-    this.resource.addProperty(CIDOC.P79_beginning_is_qualified_by, quality.toString())
-      .addProperty(CIDOC.P80_end_is_qualified_by, quality.toString());
+    this.resource.addProperty(CIDOC.P79_beginning_is_qualified_by, quality.toString());
+  }
+
+  public void setQualityEnd(Precision quality) {
+    if (quality == null) return;
+    this.quality = quality;
+
+    this.resource.addProperty(CIDOC.P80_end_is_qualified_by, quality.toString());
   }
 
   @Override

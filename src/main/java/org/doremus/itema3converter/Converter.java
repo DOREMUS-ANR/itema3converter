@@ -118,6 +118,7 @@ public class Converter {
   }
 
   public static void parsePerson(String id) {
+
     File f = new File(Paths.get(dataFolderPath, "PERSONNE", id + ".xml").toString());
     parsePerson(f, outputFolderPath + "/person", true);
   }

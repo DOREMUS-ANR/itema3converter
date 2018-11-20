@@ -4,7 +4,6 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.doremus.itema3converter.Converter;
-import org.doremus.itema3converter.RecordConverter;
 import org.doremus.itema3converter.files.*;
 import org.doremus.ontology.CIDOC;
 import org.doremus.ontology.MUS;
@@ -24,7 +23,7 @@ public class M29_Editing extends DoremusResource {
     if (!emissions.isEmpty()) {
       Emission emission = emissions.get(0).getEmission();
       if (emission != null && emission.num != 1107)
-        addActivity(Converter.RADIO_FRANCE, "Editeur");
+        addActivity(Converter.RADIO_FRANCE, "editeur");
     }
 
     // Activities
@@ -33,7 +32,7 @@ public class M29_Editing extends DoremusResource {
       assert af != null;
       if (!af.isAnEditingRole()) continue;
       E21_Person person = new E21_Person(ip.personneId);
-      addActivity(person.asResource(), af.asResource());
+      addActivity(person, af);
     }
   }
 
@@ -45,13 +44,18 @@ public class M29_Editing extends DoremusResource {
       .addProperty(RDFS.label, function, "fr"));
   }
 
+  private void addActivity(E21_Person actor, M31_ActorFunction function) {
+    this.addActivity(actor.asResource(), function.asResource());
+    this.model.add(actor.getModel()).add(function.getModel());
+  }
+
   private void addActivity(Resource actor, Resource function) {
     String a_uri = this.uri + "/" + ++countActivity;
     this.resource.addProperty(CIDOC.P9_consists_of,
       model.createResource(a_uri)
         .addProperty(RDF.type, CIDOC.E7_Activity)
         .addProperty(CIDOC.P14_carried_out_by, actor)
-        .addProperty(MUS.U31_had_function, function)
-    );
+        .addProperty(MUS.U31_had_function, function));
   }
+
 }
