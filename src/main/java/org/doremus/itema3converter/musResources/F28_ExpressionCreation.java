@@ -39,7 +39,7 @@ public class F28_ExpressionCreation extends DoremusResource {
 
     // date of the work
     String date = omu.compositionDate.trim();
-    if (!date.isEmpty()) {
+    if (!date.isEmpty() && !date.contains("création") && !date.contains("cration")) {
       try {
         this.timeSpan = toTimeSpan(date);
         this.resource.addProperty(CIDOC.P4_has_time_span, timeSpan.asResource());
@@ -103,6 +103,9 @@ public class F28_ExpressionCreation extends DoremusResource {
       uncertain.add(uct);
       if (uct)
         value = value.replace("environ", "").trim();
+
+      value = value.replaceAll("a-z", "").trim();
+      if (!value.matches("^\\d{4}(-\\d{2}(-\\d{2})?)?")) continue;
 
       // From length detect Datatype
       XSDDatatype type = comps.size() == 3 ? XSDDatatype.XSDdate :
