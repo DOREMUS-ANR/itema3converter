@@ -1,5 +1,6 @@
 package org.doremus.itema3converter.musResources;
 
+import io.github.pasqlisena.RomanConverter;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.vocabulary.RDF;
@@ -13,6 +14,7 @@ import org.doremus.ontology.FRBROO;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.regex.Matcher;
 
 public class F28_ExpressionCreation extends DoremusResource {
 
@@ -39,11 +41,10 @@ public class F28_ExpressionCreation extends DoremusResource {
 
     // date of the work
     String date = omu.compositionDate.trim();
-    if (!date.isEmpty() && !date.contains("création") && !date.contains("cration")) {
+    if (!date.isEmpty()) {
       try {
         this.timeSpan = toTimeSpan(date);
-        this.resource.addProperty(CIDOC.P4_has_time_span, timeSpan.asResource());
-        this.model.add(timeSpan.model);
+        this.addProperty(CIDOC.P4_has_time_span, timeSpan);
       } catch (URISyntaxException e) {
         e.printStackTrace();
       }
@@ -86,9 +87,24 @@ public class F28_ExpressionCreation extends DoremusResource {
     return derivation;
   }
 
+
   private E52_TimeSpan toTimeSpan(String date) throws URISyntaxException {
-    String[] parts = date.split("-", 2);
+    E52_TimeSpan ts;
+    URI url = new URI(this.uri + "/time");
+    if (date.matches(E52_TimeSpan.CENTURY_REGEX)) {
+      Matcher mt = E52_TimeSpan.CENTURY_PATTERN.matcher(date);
+      mt.find();
+      String cent = mt.group(1);
+      int ct = RomanConverter.isRoman(cent) ? RomanConverter.toNumerical(cent) : Integer.parseInt(cent);
+      Literal lit = model.createTypedLiteral(ct + "00", XSDDatatype.XSDgYear);
+      ts = new E52_TimeSpan(url, lit, lit);
+      ts.setQuality(E52_TimeSpan.Precision.CENTURY);
+      return ts;
+    }
+
+
     List<Literal> literals = new ArrayList<>();
+    String[] parts = date.toLowerCase().split("(-| et )", 2);
 
     List<Boolean> uncertain = new ArrayList<>();
 
@@ -99,13 +115,19 @@ public class F28_ExpressionCreation extends DoremusResource {
       Collections.reverse(comps);
       String value = String.join("-", comps);
 
-      boolean uct = value.contains("environ");
+      boolean uct = value.contains("environ") || value.contains("vers") || value.contains("après");
       uncertain.add(uct);
       if (uct)
-        value = value.replace("environ", "").trim();
+        value = value.replaceAll("env(\\.|iron)", "")
+          .replace("vers", "")
+          .replace("apr[èe]s", "")
+          .trim();
+
+      if (!value.matches("\\d{4}+.+") && value.matches(E52_TimeSpan.frenchDateRegex))
+        value = E52_TimeSpan.frenchToISO(value);
 
       value = value.replaceAll("a-z", "").trim();
-      if (!value.matches("^\\d{4}(-\\d{2}(-\\d{2})?)?")) continue;
+      if (!value.matches("^\\d{4}(-\\d{2}(-\\d{2})?)?")) return null;
 
       // From length detect Datatype
       XSDDatatype type = comps.size() == 3 ? XSDDatatype.XSDdate :
@@ -119,7 +141,7 @@ public class F28_ExpressionCreation extends DoremusResource {
     boolean uctStart = uncertain.get(0);
     boolean uctEnd = uncertain.get(uncertain.size() - 1);
 
-    E52_TimeSpan ts = new E52_TimeSpan(new URI(this.uri + "/time"), start, end);
+    ts = new E52_TimeSpan(url, start, end);
     if (uctStart) ts.setQualityStart(E52_TimeSpan.Precision.UNCERTAINTY);
     if (uctEnd) ts.setQualityStart(E52_TimeSpan.Precision.UNCERTAINTY);
     return ts;

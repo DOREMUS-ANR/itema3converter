@@ -11,13 +11,23 @@ import java.net.URI;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class E52_TimeSpan extends DoremusResource {
   public static final DateFormat ISODateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+  public static final String frenchDayRegex = "(1er|[\\d]{1,2})";
+  public static final String frenchMonthRegex = "(janvier|février|mars|avril|mai|juin|juillet|ao[ûu]t|septembre|octobre|novembre|décembre)";
+  public static final String frenchDateRegex = "(?:le )?(?:" + frenchDayRegex + "? ?" + frenchMonthRegex + "? ?)?(\\d{4})";
+  public static final String CENTURY_REGEX = "([\\dXVI]+)[èe](me)?(?: siècle)?";
+  public static final Pattern CENTURY_PATTERN = Pattern.compile(CENTURY_REGEX);
+
   private String label;
   private Literal start, end;
 
   private Precision quality;
+
 
   public Literal getStart() {
     return start;
@@ -64,6 +74,53 @@ public class E52_TimeSpan extends DoremusResource {
         .addProperty(RDF.type, Time.Instant)
         .addProperty(Time.inXSDDate, this.end));
   }
+
+  @SuppressWarnings("SpellCheckingInspection")
+  private static String frenchMonthToNumber(String month) {
+    if (month == null || month.isEmpty()) return null;
+    if (month.length() == 2) return month;
+
+    String mm = month.toLowerCase();
+    switch (mm) {
+      case "janvier":
+        return "01";
+      case "février":
+        return "02";
+      case "mars":
+        return "03";
+      case "avril":
+        return "04";
+      case "mai":
+        return "05";
+      case "juin":
+        return "06";
+      case "juillet":
+        return "07";
+      case "août":
+        return "08";
+      case "septembre":
+        return "09";
+      case "octobre":
+        return "10";
+      case "novembre":
+        return "11";
+      case "décembre":
+        return "12";
+      default:
+        return null;
+    }
+  }
+
+  public static String frenchToISO(String txt) {
+    Matcher ma = Pattern.compile(frenchDateRegex).matcher(txt);
+    String d = ma.group(1);
+    String m = ma.group(2);
+    String y = ma.group(3);
+    if (m != null) y += "-" + frenchMonthToNumber(m);
+    if (d != null) y += "-" + d;
+    return y;
+  }
+
 
   public E52_TimeSpan(URI uri, Literal start, Literal end) {
     super(uri);

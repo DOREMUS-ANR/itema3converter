@@ -2,6 +2,7 @@ package org.doremus.itema3converter.musResources;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.DC;
@@ -81,6 +82,20 @@ public abstract class DoremusResource {
     this(identifier);
     this.record = record;
   }
+
+  public DoremusResource addProperty(Property property, DoremusResource resource) {
+    if (resource != null) {
+      this.addProperty(property, resource.asResource());
+      this.model.add(resource.getModel());
+    }
+    return this;
+  }
+
+  public DoremusResource addProperty(Property property, Resource resource) {
+    if (resource != null) this.resource.addProperty(property, resource);
+    return this;
+  }
+
 
   public Resource asResource() {
     return this.resource;
