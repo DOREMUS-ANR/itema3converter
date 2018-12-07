@@ -127,7 +127,7 @@ public class F28_ExpressionCreation extends DoremusResource {
         value = E52_TimeSpan.frenchToISO(value);
 
       value = value.replaceAll("a-z", "").trim();
-      if (!value.matches("^\\d{4}(-\\d{2}(-\\d{2})?)?")) return null;
+      if (!value.matches("^-?\\d{4}(-\\d{2}(-\\d{2})?)?")) return null;
 
       // From length detect Datatype
       XSDDatatype type = comps.size() == 3 ? XSDDatatype.XSDdate :
